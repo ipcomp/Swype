@@ -1,0 +1,63 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.example.swype"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    
+
+    defaultConfig {
+        applicationId = "com.example.swype"
+        minSdk = 23
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+
+        buildFeatures {
+            buildConfig true
+        }
+    }
+
+    signingConfigs{
+       debug{
+            keyAlias 'my-key-alias'
+            keyPassword 'swype1'
+            storeFile file('my-release-key.jks')
+            storePassword 'swype1'
+        }
+        release{
+            keyAlias 'my-key-alias'
+            keyPassword 'swype1'
+            storeFile file('my-release-key.jks')
+            storePassword 'swype1'
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
