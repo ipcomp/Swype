@@ -50,7 +50,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextField(
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.zero, // Adjusted vertical padding
+          contentPadding: EdgeInsets.zero, 
           prefixIcon: Container(
             width: 20,
             height: 20,
