@@ -195,7 +195,7 @@
 //                           ),
 //                           shadowColor: Colors.transparent,
 //                         ),
-//                         child: SvgPicture.asset('assets/svg/back_button.svg'),
+//                         child: SvgPicture.asset('assets/svg/back_left.svg'),
 //                       )
 //                     ],
 //                   ),
@@ -387,7 +387,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
   @override
   void codeUpdated() {
     setState(() {
-      otpController.text = code ?? '';
+      if (mounted) {
+        otpController.text = code ?? '';
+      }
     });
   }
 
@@ -520,139 +522,142 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
     int minutes = _timeRemaining ~/ 60;
     int seconds = _timeRemaining % 60;
     final translations = CHelperFunctions().getTranslations(ref);
-    return Stack(
-      children: [
-        Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(height: 50),
-                  Row(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          SystemNavigator.pop();
+    return PopScope(
+      canPop: false,
+      child: Stack(
+        children: [
+          Scaffold(
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const SizedBox(height: 50),
+                    Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            SystemNavigator.pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(52, 52),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            side: const BorderSide(
+                              color: Color(0xFFE8E6EA),
+                              width: 1.0,
+                            ),
+                            shadowColor: Colors.transparent,
+                          ),
+                          child: SvgPicture.asset('assets/svg/back_left.svg'),
+                        )
+                      ],
+                    ),
+                    const SizedBox(height: 42),
+                    Text(
+                      '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
+                      style: TextStyle(
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                        color: CColors.secondary,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: SizedBox(
+                        width: 215,
+                        child: Text(
+                          translations[
+                                  "Type the verification code we’ve sent you"] ??
+                              "Type the verification code we’ve sent you",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            color: Color.fromRGBO(21, 33, 31, .7),
+                            height: 1.5,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 102),
+                    Text(
+                      translations['OTP via Phone'] ?? 'OTP via Phone',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Color.fromRGBO(21, 33, 31, .7),
+                        height: 1.5,
+                        fontWeight: FontWeight.w400,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 13),
+                    Form(
+                      key: _formKey,
+                      child: PinCodeTextField(
+                        appContext: context,
+                        length: 6,
+                        animationType: AnimationType.fade,
+                        controller: otpController,
+                        onChanged: (value) {
+                          setState(() {});
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(52, 52),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                        pinTheme: PinTheme(
+                          shape: PinCodeFieldShape.box,
+                          borderRadius: BorderRadius.circular(10),
+                          fieldHeight: 48,
+                          fieldWidth: 48,
+                          activeColor: otpController.text.isNotEmpty
+                              ? CColors.primary
+                              : Colors.transparent,
+                          inactiveColor: const Color(0xFFE8E6EA),
+                          selectedColor: otpController.text.isNotEmpty
+                              ? CColors.primary
+                              : const Color(0xFFE8E6EA),
+                        ),
+                        animationDuration: const Duration(milliseconds: 300),
+                      ),
+                    ),
+                    Visibility(
+                      visible: _isResendAvailable,
+                      child: TextButton(
+                        onPressed: _resendOtp,
+                        child: Text(
+                          translations['Resend OTP'] ?? 'Resend OTP',
+                          style: TextStyle(
+                            color: CColors.primary,
+                            fontSize: 16,
                           ),
-                          side: const BorderSide(
-                            color: Color(0xFFE8E6EA),
-                            width: 1.0,
-                          ),
-                          shadowColor: Colors.transparent,
-                        ),
-                        child: SvgPicture.asset('assets/svg/back_button.svg'),
-                      )
-                    ],
-                  ),
-                  const SizedBox(height: 42),
-                  Text(
-                    '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: CColors.secondary,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Center(
-                    child: SizedBox(
-                      width: 215,
-                      child: Text(
-                        translations[
-                                "Type the verification code we’ve sent you"] ??
-                            "Type the verification code we’ve sent you",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Color.fromRGBO(21, 33, 31, .7),
-                          height: 1.5,
-                          fontWeight: FontWeight.w400,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 102),
-                  Text(
-                    translations['OTP via Phone'] ?? 'OTP via Phone',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      color: Color.fromRGBO(21, 33, 31, .7),
-                      height: 1.5,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 13),
-                  Form(
-                    key: _formKey,
-                    child: PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      animationType: AnimationType.fade,
-                      controller: otpController,
-                      onChanged: (value) {
-                        setState(() {});
-                      },
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(10),
-                        fieldHeight: 48,
-                        fieldWidth: 48,
-                        activeColor: otpController.text.isNotEmpty
-                            ? CColors.primary
-                            : Colors.transparent,
-                        inactiveColor: const Color(0xFFE8E6EA),
-                        selectedColor: otpController.text.isNotEmpty
-                            ? CColors.primary
-                            : const Color(0xFFE8E6EA),
-                      ),
-                      animationDuration: const Duration(milliseconds: 300),
-                    ),
-                  ),
-                  Visibility(
-                    visible: _isResendAvailable,
-                    child: TextButton(
-                      onPressed: _resendOtp,
-                      child: Text(
-                        translations['Resend OTP'] ?? 'Resend OTP',
-                        style: TextStyle(
-                          color: CColors.primary,
-                          fontSize: 16,
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 36),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _submitOtp,
-                      child: Text(
-                        translations['Verify OTP'] ?? 'Verify OTP',
+                    const SizedBox(height: 36),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _submitOtp,
+                        child: Text(
+                          translations['Verify OTP'] ?? 'Verify OTP',
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        if (_isLoading)
-          const LoaderScreen(
-            gifPath: "assets/gif/loader.gif",
-          ),
-      ],
+          if (_isLoading)
+            const LoaderScreen(
+              gifPath: "assets/gif/loader.gif",
+            ),
+        ],
+      ),
     );
   }
 }

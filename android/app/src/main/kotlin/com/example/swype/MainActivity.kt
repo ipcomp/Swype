@@ -1,4 +1,4 @@
-package com.example.swype
+package com.swype
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -1,6 +1,8 @@
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
-import 'package:page_animation_transition/page_animation_transition.dart'; // Import the package
+import 'package:page_animation_transition/page_animation_transition.dart';
 import 'package:swype/features/authentication/register/screens/registration_selector.dart';
 import 'package:swype/features/authentication/register/screens/user_preferences.dart';
 import 'package:swype/features/settings/screens/change_password_screen.dart';
@@ -13,7 +15,7 @@ import 'package:swype/features/settings/screens/q&a/question_answer_screen.dart'
 import 'package:swype/features/settings/screens/two_factor_authentication_screen.dart';
 import 'package:swype/features/settings/screens/update_user_preferences.dart';
 import 'package:swype/features/subscription/screens/subscription_screen.dart';
-import 'app_routes.dart'; // Ensure correct path
+import 'app_routes.dart';
 import 'package:swype/features/authentication/login/screens/login/login_screen.dart';
 import 'package:swype/features/authentication/login/screens/onboarding/onboarding_screen.dart';
 import 'package:swype/features/authentication/register/screens/register_screen.dart';
@@ -35,7 +37,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       page = const OnboardingScreen();
       break;
     case AppRoutes.login:
-      page = LoginScreen();
+      page = const LoginScreen();
       break;
     case AppRoutes.registerSelector:
       page = const RegistrationSelector();
@@ -103,9 +105,15 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       );
   }
 
-  return PageAnimationTransition(
-    page: page,
-    pageAnimationType:
-        FadeAnimationTransition(), // Change animation type as needed
-  );
+  if (Platform.isIOS) {
+    return CupertinoPageRoute(
+      builder: (context) => page,
+      settings: settings,
+    );
+  } else {
+    return PageAnimationTransition(
+      page: page,
+      pageAnimationType: FadeAnimationTransition(),
+    );
+  }
 }

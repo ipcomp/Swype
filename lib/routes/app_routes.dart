@@ -21,6 +21,7 @@ class AppRoutes {
   static const String nearby = "/nearby";
   static const String matches = "/matches";
   static const String chat = "/chat";
+  static const String messages = "/messages";
   static const String settings = "/settings";
   static const String userPreferences = "/user-preferences";
 

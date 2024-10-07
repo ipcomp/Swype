@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:swype/commons/widgets/back_button_transparent_bg.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/settings/controllers/logout_service.dart';
@@ -26,18 +27,25 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void logoutUser() async {
+    if (!mounted) return;
+
     setState(() {
       isLoading = true;
     });
+
     final response = await logoutService.logoutUser(ref, context);
-    if (response) {
-      CHelperFunctions.showToaster(context, 'Logout Success');
-    } else {
-      CHelperFunctions.showToaster(context, 'Logout failed');
+
+    if (mounted) {
+      if (response) {
+        CHelperFunctions.showToaster(context, 'Logout Success');
+      } else {
+        CHelperFunctions.showToaster(context, 'Logout failed');
+      }
+
+      setState(() {
+        isLoading = false;
+      });
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
   String capitalize(String text) {
@@ -62,6 +70,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
               backgroundColor: const Color(0xFFFDECEE),
               appBar: AppBar(
                 toolbarHeight: 75,
+                titleSpacing: 27,
                 backgroundColor: const Color(0xFFFDECEE),
                 title: Text(
                   translations['General Settings'] ?? 'General Settings',
@@ -72,39 +81,12 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                     height: 1.5,
                   ),
                 ),
+                centerTitle: false,
                 automaticallyImplyLeading: false,
                 actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, AppRoutes.home);
-                      },
-                      style: ButtonStyle(
-                        splashFactory: NoSplash.splashFactory,
-                        elevation: WidgetStateProperty.all(0),
-                        overlayColor:
-                            WidgetStateProperty.all(Colors.transparent),
-                        shadowColor:
-                            WidgetStateProperty.all(Colors.transparent),
-                      ),
-                      child: Container(
-                        height: 52,
-                        width: 52,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(15),
-                          color: Colors.white,
-                          border: Border.all(
-                            color: const Color(0xFFE8E6EA),
-                          ),
-                        ),
-                        child: SvgPicture.asset(
-                          'assets/svg/back_button.svg',
-                        ),
-                      ),
-                    ),
-                  ),
+                  customBackButtonTransparentBg(context, onPress: () {
+                    Navigator.pushReplacementNamed(context, AppRoutes.home);
+                  })
                 ],
               ),
               body: SingleChildScrollView(

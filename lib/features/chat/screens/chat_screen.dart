@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,7 +51,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: TextField(
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.zero, 
+          contentPadding: EdgeInsets.zero,
           prefixIcon: Container(
             width: 20,
             height: 20,
@@ -200,47 +201,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SingleChildScrollView(
-        child: Column(
-          children: matchesUserProvider.matches!.map((match) {
-            // Safely access matchUser and provide default values
-            final matchUser = match.matchUser;
-            final username = matchUser?.username ?? 'NA';
-            final profilePictureUrl = matchUser?.profilePictureUrl ?? 'NA';
+    return SingleChildScrollView(
+      child: Column(
+        children: matchesUserProvider.matches!.map((match) {
+          // Safely access matchUser and provide default values
+          final matchUser = match.matchUser;
+          final username = matchUser?.username ?? 'NA';
+          final profilePictureUrl = matchUser?.profilePictureUrl ?? 'NA';
 
-            return GestureDetector(
-              onTap: () {
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  backgroundColor: Colors.white,
-                  useSafeArea: true,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(16)),
-                  ),
-                  builder: (BuildContext context) {
-                    return const MessagesScreen(userId: '3');
-                  },
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: _buildMessageTile(
-                  username,
-                  'You: Hey! What’s up, long time..',
-                  profilePictureUrl,
-                  '23 min',
-                  true,
-                  true,
-                  false,
-                ),
+          return InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                CupertinoPageRoute(
+                    builder: (context) => const MessagesScreen(
+                          userId: '3',
+                        )),
+              );
+            },
+            child: Padding(
+              // padding: const EdgeInsets.only(bottom: 6),
+              padding:
+                  const EdgeInsets.only(left: 20, right: 20, bottom: 6, top: 6),
+
+              child: _buildMessageTile(
+                username,
+                'You: Hey! What’s up, long time..',
+                profilePictureUrl,
+                '23 min',
+                true,
+                true,
+                false,
               ),
-            );
-          }).toList(), // Convert the Iterable to a List
-        ),
+            ),
+          );
+        }).toList(), // Convert the Iterable to a List
       ),
     );
   }
@@ -251,7 +245,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       backgroundColor: Colors.white,
       automaticallyImplyLeading: false,
       title: Padding(
-        padding: const EdgeInsets.only(left: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Text(
           'Messages',
           style: TextStyle(

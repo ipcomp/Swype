@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:swype/commons/widgets/back_button_transparent_bg.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/commons/widgets/match_avatar_widget.dart';
 import 'package:swype/routes/app_routes.dart';
@@ -108,33 +109,9 @@ class _QuestionAnswerScreenState extends ConsumerState<QuestionAnswerScreen> {
         ),
       ),
       automaticallyImplyLeading: false,
-      titleSpacing: 20,
-      actions: [
-        Padding(
-          padding: textDirection == TextDirection.rtl
-              ? const EdgeInsets.only(left: 20.0)
-              : const EdgeInsets.only(right: 20.0),
-          child: Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: CColors.accent),
-              color: Colors.white,
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.chevron_right,
-                color: CColors.primary,
-                size: 24,
-              ),
-              onPressed: () {
-                Navigator.pop(context); // Navigate back
-              },
-            ),
-          ),
-        ),
-      ],
+      // titleSpacing: 20,
+      centerTitle: false,
+      actions: [customBackButtonTransparentBg(context)],
     );
   }
 

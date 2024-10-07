@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/routes/app_routes.dart';
@@ -64,43 +66,66 @@ class NearByScreenState extends ConsumerState<NearByScreen>
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       },
       child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: Colors.white,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 0),
-            child: Text(
-              'Near By You',
-              style: TextStyle(
-                color: CColors.secondary,
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
-                height: 1.5,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(52),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: AppBar(
+                automaticallyImplyLeading: false,
+                backgroundColor: Colors.white,
+                title: Padding(
+                  padding: const EdgeInsets.only(left: 0),
+                  child: Text(
+                    'Near By You',
+                    style: TextStyle(
+                      color: CColors.secondary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+                leadingWidth: 52,
+                leading: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+                  },
+                  child: Container(
+                    height: 52,
+                    padding: const EdgeInsets.all(11),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: const Color(0xFFE8E6EA),
+                      ),
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/svg/back_left.svg',
+                    ),
+                  ),
+                ),
+                actions: [
+                  GestureDetector(
+                    onTap: () {},
+                    child: Container(
+                      height: 52,
+                      width: 52,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: const Color(0xFFE8E6EA),
+                        ),
+                      ),
+                      child: SvgPicture.asset('assets/svg/filter.svg'),
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  splashFactory: NoSplash.splashFactory,
-                ),
-                child: Text(
-                  'Back',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: CColors.primary,
-                  ),
-                ),
-              ),
-            )
-          ],
         ),
         body: Stack(
           alignment: Alignment.center,

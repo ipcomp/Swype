@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_controller.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -33,7 +35,9 @@ class OnboardingController {
 
   void handleRegister(BuildContext context) {
     if (currentPage == 2) {
-      Navigator.pushReplacementNamed(context, AppRoutes.registerSelector);
+      Platform.isAndroid
+          ? Navigator.pushReplacementNamed(context, AppRoutes.registerSelector)
+          : Navigator.pushNamed(context, AppRoutes.registerSelector);
     } else {
       carouselController.nextPage(
         duration: const Duration(milliseconds: 300),
