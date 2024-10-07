@@ -15,7 +15,12 @@ class DiscoverController {
           CHelperFunctions.showToaster(context, data['message']);
           return false;
         }
-        return true;
+        if (data['data'].length) {
+          print(data['data']);
+          return true;
+        } else {
+          return false;
+        }
       } else {
         CHelperFunctions.showToaster(context, response.statusMessage!);
         return false;
