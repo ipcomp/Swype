@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swype/features/matches/data/match_data.dart';
-import 'package:swype/features/matches/data/matches_provider.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/dio/dio_client.dart';
 

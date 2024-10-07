@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swype/utils/constants/colors.dart';
 
 class GalleryViewScreen extends ConsumerStatefulWidget {
-  final List<String> imageList;
+  final List<dynamic> imageList;
   final int initialIndex;
 
   const GalleryViewScreen(
@@ -75,8 +75,8 @@ class _GalleryViewScreenState extends ConsumerState<GalleryViewScreen> {
               itemBuilder: (context, index, realIdx) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(0),
-                  child: Image.asset(
-                    widget.imageList[index],
+                  child: Image.network(
+                    widget.imageList[index]['photo_url'],
                     fit: BoxFit.cover,
                     width: double.infinity,
                   ),
@@ -114,12 +114,12 @@ class _GalleryViewScreenState extends ConsumerState<GalleryViewScreen> {
                 margin: const EdgeInsets.symmetric(horizontal: 11),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    widget.imageList[index],
+                  child: Image.network(
+                    widget.imageList[index]['photo_url'],
                     fit: BoxFit.cover,
                     opacity: currentIndex == index
-                        ? AlwaysStoppedAnimation(1)
-                        : AlwaysStoppedAnimation(0.4),
+                        ? const AlwaysStoppedAnimation(1)
+                        : const AlwaysStoppedAnimation(0.4),
                   ),
                 ),
               ),

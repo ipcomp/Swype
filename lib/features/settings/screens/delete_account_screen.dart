@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/settings/screens/verify_otp_for_delete_account.dart';
 import 'package:swype/routes/api_routes.dart';
@@ -21,8 +22,21 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
   final TextEditingController passwordController = TextEditingController();
   final DioClient dioClient = DioClient();
   bool isLoading = false;
+  String appSignature = "";
 
-  // Function to send OTP
+  @override
+  void initState() {
+    super.initState();
+    generateAppSignature();
+  }
+
+  void generateAppSignature() async {
+    final code = await SmsAutoFill().getAppSignature;
+    setState(() {
+      appSignature = code;
+    });
+  }
+
   Future<void> sendOtp(String phone) async {
     if (phone.isEmpty) {
       CHelperFunctions.showToaster(
@@ -34,13 +48,12 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       isLoading = true;
     });
 
-    // Create FormData and add the phone number
     FormData formData = FormData.fromMap({
       'phone_number': phone,
+      'hash_string': appSignature,
     });
 
     try {
-      // Send the POST request
       final response = await dioClient.postWithFormData(
           ApiRoutes.otpSendForDelete, formData);
 

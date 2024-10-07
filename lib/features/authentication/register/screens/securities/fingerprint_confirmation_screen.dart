@@ -8,7 +8,7 @@ import 'package:swype/utils/helpers/helper_functions.dart';
 import 'package:swype/utils/preferences/preferences_provider.dart'; // Assuming your color constants
 
 class FingerprintConfirmationScreen extends ConsumerStatefulWidget {
-  const FingerprintConfirmationScreen({Key? key}) : super(key: key);
+  const FingerprintConfirmationScreen({super.key});
 
   @override
   _FingerprintConfirmationScreenState createState() =>

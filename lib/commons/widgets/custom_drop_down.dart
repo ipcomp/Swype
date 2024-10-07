@@ -161,12 +161,12 @@ class CustomDropdownBottomSheet extends ConsumerStatefulWidget {
   final Function(int) onItemSelected; // Callback function for selected id
 
   const CustomDropdownBottomSheet({
-    Key? key,
+    super.key,
     required this.title,
     required this.items,
     this.initialValueId, // Make this optional
     required this.onItemSelected,
-  }) : super(key: key);
+  });
 
   @override
   _CustomDropdownBottomSheetState createState() =>
@@ -210,7 +210,7 @@ class _CustomDropdownBottomSheetState
                     controller: searchController,
                     decoration: InputDecoration(
                       labelText: translations['Search'] ?? 'Search',
-                      border: OutlineInputBorder(),
+                      border: const OutlineInputBorder(),
                     ),
                     onChanged: (value) {
                       setState(() {

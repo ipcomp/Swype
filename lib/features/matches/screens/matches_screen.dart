@@ -39,7 +39,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
       },
       child: Scaffold(
         appBar: AppBar(
-          toolbarHeight: 85,
+          toolbarHeight: 70,
           backgroundColor: Colors.white,
           automaticallyImplyLeading: false,
           elevation: 0,

@@ -12,6 +12,7 @@ class ApiRoutes {
   // Get User Profile
   static const String getUser = '$baseUrl/get-user-profile';
   static const String updateUser = '$baseUrl/user-profile-update';
+  static const String uploadImages = '$baseUrl/upload-media';
   static const String allUserList = '$baseUrl/all-users-list';
 
   // Advance Search

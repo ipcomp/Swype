@@ -28,11 +28,20 @@ class VerifyOtpForDeleteAccountState
   bool _isResendingOtp = false; // Loader for resending OTP
   final _formKey = GlobalKey<FormState>();
   DioClient dioClient = DioClient();
+  String appSignature = "";
 
   @override
   void initState() {
     super.initState();
-    listenForCode(); // Start listening for the SMS code
+    listenForCode();
+    generateAppSignature();
+  }
+
+  void generateAppSignature() async {
+    final code = await SmsAutoFill().getAppSignature;
+    setState(() {
+      appSignature = code;
+    });
   }
 
   @override
@@ -47,7 +56,6 @@ class VerifyOtpForDeleteAccountState
       _otpCode = code ?? '';
     });
 
-    // Automatically submit OTP when it reaches the correct length
     if (_otpCode.length == 6) {
       _submitOtp(_otpCode);
     }
@@ -97,7 +105,7 @@ class VerifyOtpForDeleteAccountState
       CHelperFunctions.showToaster(context, 'Error: $e');
     } finally {
       setState(() {
-        _isLoading = false; // Hide loader
+        _isLoading = false;
       });
     }
   }
@@ -105,12 +113,12 @@ class VerifyOtpForDeleteAccountState
   Future<void> resendOtp() async {
     FocusScope.of(context).unfocus();
     setState(() {
-      _isResendingOtp = true; // Show resend OTP loader
+      _isResendingOtp = true;
     });
 
-    // Create FormData and add the phone number
     FormData formData = FormData.fromMap({
       'phone_number': widget.phoneNumber,
+      'hash_string': appSignature,
     });
 
     try {
