@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
 import 'package:page_animation_transition/page_animation_transition.dart';
@@ -42,7 +43,9 @@ class _UserPreferencesState extends ConsumerState<UserPreferences> {
   @override
   void initState() {
     super.initState();
-    ref.read(allUsersProvider.notifier).fetchUserList();
+
+    // ref.read(allUsersProvider.notifier).fetchUserList();
+    getAuthToken();
     ref.read(profileOptionsProvider.notifier).fetchProfileOptions();
 
     final currentLang = ref.read(preferencesProvider).preferredLanguage;
@@ -57,6 +60,22 @@ class _UserPreferencesState extends ConsumerState<UserPreferences> {
     }
     fetchCities();
     _checkBiometrics();
+  }
+
+  Future<String?> getAuthToken() async {
+    const FlutterSecureStorage storage = FlutterSecureStorage();
+
+    String? token = await storage.read(key: 'auth_token');
+
+    if (token != null) {
+      print("Token: " + token);
+      ref.read(allUsersProvider.notifier).fetchUserList(token);
+    } else {
+      print("Getting token null");
+      ;
+    }
+
+    return token;
   }
 
   Future<void> _checkBiometrics() async {

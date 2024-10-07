@@ -60,7 +60,8 @@ class LoginController {
             final authToken = data['data']['access_token'];
             ref.read(authProvider.notifier).login(authToken, '${user['id']}');
             ref.read(userProvider.notifier).setUser(user);
-            ref.read(allUsersProvider.notifier).fetchUserList();
+            print("Token: " + authToken);
+            ref.read(allUsersProvider.notifier).fetchUserList(authToken);
             CHelperFunctions.showToaster(context, data['message']);
             return true;
           }
@@ -108,7 +109,7 @@ class LoginController {
             final userId = data['data']['user']['id'];
             ref.read(authProvider.notifier).login(authToken, '$userId');
             ref.read(userProvider.notifier).setUser(data['data']['user']);
-            ref.read(allUsersProvider.notifier).fetchUserList();
+            ref.read(allUsersProvider.notifier).fetchUserList(authToken);
             CHelperFunctions.showToaster(context, data['message']);
             return true;
           } else {

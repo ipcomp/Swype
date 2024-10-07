@@ -1,6 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swype/routes/api_routes.dart';
-import 'package:swype/utils/dio/dio_client.dart';
 
 // Update the provider to expect a List of maps
 final allUsersProvider =
@@ -12,11 +12,16 @@ final allUsersProvider =
 class AllUsersNotifier extends StateNotifier<List<Map<String, dynamic>>?> {
   AllUsersNotifier() : super(null);
 
-  DioClient dioClient = DioClient();
+  Dio dio = Dio();
 
-  Future<void> fetchUserList() async {
+  Future<void> fetchUserList(String token) async {
     try {
-      final response = await dioClient.get(ApiRoutes.allUserList);
+      final response = await dio.get(ApiRoutes.allUserList,
+          options: Options(
+            headers: {
+              'Authorization': "Bearer $token", // Correct header placement
+            },
+          ));
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -27,9 +32,11 @@ class AllUsersNotifier extends StateNotifier<List<Map<String, dynamic>>?> {
           state = userList;
         } else {
           throw Exception(
-              'Failed to load user list, status code: ${data['status_code']}');
+              'Failed to load user list, status code: ${data['status_code']} - ${response.data}');
         }
       } else {
+        print('Response: ${response.statusCode} - ${response.data}');
+
         throw Exception(
             'Failed to load user list, response code: ${response.statusCode}');
       }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
 import 'package:page_animation_transition/page_animation_transition.dart';
@@ -92,7 +93,15 @@ class SplashController {
         ),
       );
     } else if (isAuthenticated) {
-      ref.read(allUsersProvider.notifier).fetchUserList();
+      String? token = await getAuthToken();
+      if (token != null) {
+        print("Token: " + token);
+        ref.read(allUsersProvider.notifier).fetchUserList(token);
+      } else {
+        print("Getting token null");
+        ;
+      }
+
       final response = await dioClient.get(
         '${ApiRoutes.getUser}?user_id=$userId',
       );
@@ -156,5 +165,13 @@ class SplashController {
       CHelperFunctions.showToaster(context, "message");
       return false;
     }
+  }
+
+  Future<String?> getAuthToken() async {
+    const FlutterSecureStorage storage = FlutterSecureStorage();
+
+    String? token = await storage.read(key: 'auth_token');
+
+    return token;
   }
 }
