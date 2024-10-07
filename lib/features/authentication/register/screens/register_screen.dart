@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -10,7 +8,13 @@ import 'package:swype/utils/constants/image_strings.dart';
 import 'package:swype/utils/helpers/helper_functions.dart';
 
 class RegistrationScreen extends ConsumerStatefulWidget {
-  const RegistrationScreen({super.key});
+  final String? email;
+  final String? username;
+  final String? socialId;
+  final String? socialType;
+
+  const RegistrationScreen(
+      {super.key, this.email, this.username, this.socialId, this.socialType});
 
   @override
   _RegistrationScreenState createState() => _RegistrationScreenState();
@@ -26,10 +30,19 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
   String appSignature = "";
   final RegisterController _registerController = RegisterController();
   final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    if (widget.username != null) {
+      _usernameController.text = widget.username!;
+      _username = widget.username;
+    }
+    if (widget.email != null) {
+      _emailController.text = widget.email!;
+      _email = widget.email;
+    }
     generateAppSignature();
   }
 
@@ -42,6 +55,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
   @override
   void dispose() {
+    _emailController.dispose();
     _usernameController.dispose();
     super.dispose();
   }
@@ -56,13 +70,15 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
         await _registerController.registerUser(
           context,
           ref,
-          utf8.encode(_username!) as String,
+          _username!,
           _email!,
           _password!,
           _confirmPassword!,
           _phone!,
           _agreedToTerms,
           appSignature,
+          widget.socialId,
+          widget.socialType,
         );
       } catch (e) {
         CHelperFunctions.showToaster(context, 'Registration failed: $e');
@@ -101,6 +117,7 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
 
               // Username Field
               TextFormField(
+                controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: translations['User Name'] ?? "User Name",
                 ),
@@ -117,17 +134,19 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   }
                   return null;
                 },
-                onSaved: (value) => _username = value,
               ),
 
               const SizedBox(height: 16),
 
               // Email Field
+              // Email Field
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
                   labelText: translations['Email'] ?? "Email",
                 ),
                 keyboardType: TextInputType.emailAddress,
+                onSaved: (value) => _email = value, // Add this line
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return translations['Please enter your email'] ??
@@ -138,8 +157,8 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   }
                   return null;
                 },
-                onSaved: (value) => _email = value,
               ),
+
               const SizedBox(height: 16),
 
               // Phone Number Field

@@ -82,14 +82,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final translations = CHelperFunctions().getTranslations(ref);
     return PopScope(
-      canPop: false,
+      canPop: Platform.isAndroid ? false : true,
       onPopInvokedWithResult: (didPop, result) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const OnboardingScreen(),
-          ),
-        );
+        Platform.isAndroid
+            ? Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OnboardingScreen(),
+                ),
+              )
+            : null;
       },
       child: Scaffold(
         body: SingleChildScrollView(
@@ -200,13 +202,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 30),
                   Row(
                     children: <Widget>[
-                      Expanded(child: Divider(thickness: 1)),
+                      const Expanded(child: Divider(thickness: 1)),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         child: Text(translations['or sign in with'] ??
                             "or sign in with"),
                       ),
-                      Expanded(child: Divider(thickness: 1)),
+                      const Expanded(child: Divider(thickness: 1)),
                     ],
                   ),
                   const SizedBox(height: 30),

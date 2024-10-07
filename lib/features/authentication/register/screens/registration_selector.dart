@@ -3,9 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:swype/features/authentication/login/controllers/login_controller.dart';
 import 'package:swype/features/authentication/login/screens/onboarding/onboarding_screen.dart';
-import 'package:swype/features/home/screens/discover_screen.dart';
+import 'package:swype/features/authentication/register/controllers/register_controller.dart';
 import 'package:swype/routes/app_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/constants/image_strings.dart';
@@ -19,17 +18,12 @@ class RegistrationSelector extends ConsumerStatefulWidget {
 }
 
 class RegistrationSelectorState extends ConsumerState<RegistrationSelector> {
-  final LoginController loginController = LoginController();
+  final RegisterController registerController = RegisterController();
+
   Future<void> _socialLogin(String socialType) async {
     if (socialType == 'google') {
-      final result = await loginController.googleSignInMethod(ref, context);
-      if (result) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const DiscoverScreen()),
-          (Route<dynamic> route) => false,
-        );
-      }
+      // final result = await loginController.googleSignInMethod(ref, context);
+      await registerController.googleSignInMethod(ref, context);
     } else if (socialType == 'facebook') {
       // await ref.read(authServiceProvider).facebookSignInMethod();
     }
@@ -44,14 +38,16 @@ class RegistrationSelectorState extends ConsumerState<RegistrationSelector> {
   Widget build(BuildContext context) {
     final translations = CHelperFunctions().getTranslations(ref);
     return PopScope(
-      canPop: false,
+      canPop: Platform.isAndroid ? false : true,
       onPopInvokedWithResult: (didPop, result) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const OnboardingScreen(),
-          ),
-        );
+        Platform.isAndroid
+            ? Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const OnboardingScreen(),
+                ),
+              )
+            : null;
       },
       child: Scaffold(
         body: SingleChildScrollView(

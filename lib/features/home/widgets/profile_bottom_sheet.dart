@@ -37,6 +37,7 @@ class _ProfileBottomSheetState extends ConsumerState<ProfileBottomSheet> {
     final screenWidth = MediaQuery.of(context).size.width;
     final userOptions = ref.watch(profileOptionsProvider);
     final translations = CHelperFunctions().getTranslations(ref);
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -445,7 +446,7 @@ Widget _buildDetailRow(String title, String value) {
   );
 }
 
-Widget buildImages(List<String> images, navigateToGalleryView) {
+Widget buildImages(List<dynamic> images, navigateToGalleryView) {
   if (images.isEmpty) {
     return const Text("Images Not Added!",
         style: TextStyle(
@@ -472,8 +473,8 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
           },
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
-            child: Image.asset(
-              images[index],
+            child: Image.network(
+              images[index]['photo_url'],
               fit: BoxFit.cover,
             ),
           ),
@@ -601,8 +602,8 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    images[0],
+                  child: Image.network(
+                    images[0]['photo_url'],
                     fit: BoxFit.cover,
                     width: 143,
                     height: 190,
@@ -618,8 +619,8 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(
-                    images[1],
+                  child: Image.network(
+                    images[1]['photo_url'],
                     fit: BoxFit.cover,
                     width: 143,
                     height: 190,
@@ -642,7 +643,7 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(images[2],
+                  child: Image.network(images[2]['photo_url'],
                       fit: BoxFit.cover, width: 91, height: 122),
                 ),
               ),
@@ -655,7 +656,7 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(images[3],
+                  child: Image.network(images[3]['photo_url'],
                       fit: BoxFit.cover, width: 91, height: 122),
                 ),
               ),
@@ -668,7 +669,7 @@ Widget buildImages(List<String> images, navigateToGalleryView) {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: Image.asset(images[4],
+                  child: Image.network(images[4]['photo_url'],
                       fit: BoxFit.cover, width: 91, height: 122),
                 ),
               ),

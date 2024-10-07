@@ -8,9 +8,11 @@ import 'package:swype/commons/widgets/custom_drop_down_with_names.dart';
 import 'package:swype/features/authentication/providers/auth_provider.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
+import 'package:swype/features/authentication/register/screens/images_screen.dart';
 import 'package:swype/features/authentication/register/screens/user_preferences.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
+import 'package:swype/utils/dio/dio_client.dart';
 import 'dart:io';
 
 import 'package:swype/utils/helpers/helper_functions.dart';
@@ -32,7 +34,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
   String selectedGender = 'Male';
   DateTime? selectedDate;
   XFile? _profileImage;
+  List<XFile?> _remainingImages = [];
   Dio dio = Dio();
+  DioClient dioClient = DioClient();
   bool _isLoading = false;
   int _repeatCount = 0;
   final int _maxRepeatCount = 6;
@@ -60,29 +64,40 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     });
     _controller.forward();
 
-    final currentLang = ref.read(preferencesProvider).preferredLanguage;
-    if (currentLang == "en") {
+    Future.microtask(() async {
+      final translations = await CHelperFunctions().getTranslations(ref);
       setState(() {
-        selectedGender = "Male";
+        selectedGender = translations['Male'];
       });
-    } else {
-      setState(() {
-        selectedGender = "זכר";
-      });
-    }
+    });
 
     ref.read(registerProvider.notifier);
   }
 
   // Handle image picker
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
+    // final ImagePicker picker = ImagePicker();
+    // final XFile? pickedImage =
+    //     await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedImage != null) {
+    // if (pickedImage != null) {
+    //   setState(() {
+    //     _profileImage = pickedImage;
+    //   });
+    // }
+
+    final List<XFile?> selectedImages = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MediaScreen(),
+      ),
+    );
+
+    if (selectedImages.isNotEmpty) {
       setState(() {
-        _profileImage = pickedImage;
+        _profileImage = selectedImages.first;
+        _remainingImages =
+            selectedImages.sublist(1).where((image) => image != null).toList();
       });
     }
   }
@@ -122,23 +137,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     }
   }
 
-  // Submit profile details
-  void _submitProfileDetails() async {
+  // // Submit profile details
+  void _submitProfileDetails(translations) async {
     if (_formKey.currentState!.validate()) {
       if (selectedDate == null) {
         CHelperFunctions.showToaster(
             context, 'Please choose your birthday date');
         return;
       }
-      Map<String, String> genderMapping = {
-        'זכר': 'male',
-        'נקבה': 'female',
-        'אחרים': 'others',
-      };
-
-      String? genderInEnglish = genderMapping.containsKey(selectedGender)
-          ? genderMapping[selectedGender]
-          : selectedGender;
 
       if (_profileImage == null) {
         CHelperFunctions.showToaster(context, 'Please upload a profile image');
@@ -160,7 +166,11 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
           'phone': user['phone'],
           'first_name': firstNameController.text,
           'last_name': lastNameController.text,
-          'gender': genderInEnglish,
+          'gender': selectedGender == translations['Male']
+              ? "male"
+              : selectedGender == translations['Female']
+                  ? "female"
+                  : "other",
           'date_of_birth': selectedDate != null
               ? DateFormat('yyyy-MM-dd').format(selectedDate!)
               : null,
@@ -178,7 +188,27 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
           ),
         );
 
-        if (response.statusCode == 200) {
+        FormData imageData = FormData();
+
+        for (int i = 0; i < _remainingImages.length; i++) {
+          final file = File(_remainingImages[i]!.path);
+          imageData.files.add(
+            MapEntry('images[]', await MultipartFile.fromFile(file.path)),
+          );
+        }
+
+        final result = await dio.post(
+          ApiRoutes.uploadImages,
+          data: imageData,
+          options: Options(
+            contentType: 'multipart/form-data',
+            headers: {
+              'Authorization': 'Bearer ${user['token']}',
+            },
+          ),
+        );
+
+        if (response.statusCode == 200 && result.statusCode == 200) {
           final data = response.data;
           if (data['status_code'] == 200) {
             await registerNotifier.updateIsDetailsFilled(true);
@@ -204,6 +234,110 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     }
   }
 
+  // void _submitProfileDetails() async {
+  //   if (!_formKey.currentState!.validate()) return;
+
+  //   if (selectedDate == null) {
+  //     CHelperFunctions.showToaster(context, 'Please choose your birthday date');
+  //     return;
+  //   }
+
+  //   String? genderInEnglish = _mapGenderToEnglish(selectedGender);
+  //   if (genderInEnglish == null) return;
+
+  //   if (_profileImage == null) {
+  //     CHelperFunctions.showToaster(context, 'Please upload a profile image');
+  //     return;
+  //   }
+
+  //   FocusScope.of(context).unfocus();
+  //   setState(() => _isLoading = true);
+
+  //   try {
+  //     final user = ref.read(registerProvider);
+  //     await _updateUserProfile(user, genderInEnglish);
+  //     await _uploadRemainingImages();
+
+  //     // Navigate if both profile and images upload are successful
+  //     Navigator.of(context).pushAndRemoveUntil(
+  //       MaterialPageRoute(builder: (context) => const UserPreferences()),
+  //       (Route<dynamic> route) => false,
+  //     );
+  //   } catch (e) {
+  //     print('Error: $e');
+  //     CHelperFunctions.showToaster(context, 'Error updating profile');
+  //   } finally {
+  //     setState(() => _isLoading = false);
+  //   }
+  // }
+
+  // String? _mapGenderToEnglish(String? gender) {
+  //   Map<String, String> genderMapping = {
+  //     'זכר': 'male',
+  //     'נקבה': 'female',
+  //     'אחרים': 'others',
+  //   };
+
+  //   if (genderMapping.containsKey(gender)) {
+  //     return genderMapping[gender];
+  //   } else {
+  //     CHelperFunctions.showToaster(context, 'Invalid gender selected');
+  //     return null;
+  //   }
+  // }
+
+  // Future<void> _updateUserProfile(
+  //     Map<String, dynamic> user, String? gender) async {
+  //   FormData formData = FormData.fromMap({
+  //     'username': user['name'],
+  //     'email': user['email'],
+  //     'phone': user['phone'],
+  //     'first_name': firstNameController.text,
+  //     'last_name': lastNameController.text,
+  //     'gender': gender,
+  //     'date_of_birth': selectedDate != null
+  //         ? DateFormat('yyyy-MM-dd').format(selectedDate!)
+  //         : null,
+  //     'profile_picture': await MultipartFile.fromFile(_profileImage!.path),
+  //   });
+
+  //   final response = await dio.post(
+  //     ApiRoutes.updateUser,
+  //     data: formData,
+  //     options: Options(
+  //       contentType: 'multipart/form-data',
+  //       headers: {
+  //         'Authorization': 'Bearer ${user['token']}',
+  //       },
+  //     ),
+  //   );
+
+  //   if (response.statusCode != 200 || response.data['status_code'] != 200) {
+  //     throw Exception(response.data['message'] ?? 'Error updating profile');
+  //   }
+  // }
+
+  // Future<void> _uploadRemainingImages() async {
+  //   if (_remainingImages.isEmpty) return;
+
+  //   FormData imageData = FormData();
+  //   for (var image in _remainingImages) {
+  //     final file = File(image!.path);
+  //     imageData.files
+  //         .add(MapEntry('images[]', await MultipartFile.fromFile(file.path)));
+  //   }
+
+  //   final result = await dioClient.postWithFormData(
+  //     ApiRoutes.uploadImages,
+  //     imageData,
+  //   );
+  //   final data = result.data;
+  //   print(data);
+  //   if (result.statusCode != 200) {
+  //     throw Exception('Error uploading images');
+  //   }
+  // }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -221,7 +355,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
           padding: const EdgeInsets.all(20.0),
           child: SingleChildScrollView(
             child: Form(
-              key: _formKey, // Use the form key
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -244,8 +378,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
                             width: 10,
                           ),
                         ),
-                        height: 132,
-                        width: 132,
+                        height: 150,
+                        width: 150,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(25),
                           child: Image(
@@ -334,7 +468,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
                       translations["Female"] ?? "Female",
                       translations["Others"] ?? "Others",
                     ],
-                    initialValue: selectedGender,
+                    initialValue: translations['Male'],
                     onItemSelected: (selectedItem) {
                       setState(() {
                         selectedGender = selectedItem;
@@ -401,7 +535,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
                       : SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: _submitProfileDetails,
+                            onPressed: () {
+                              _submitProfileDetails(translations);
+                            },
                             child: Text(translations["Confirm"] ?? 'Confirm'),
                           ),
                         ),

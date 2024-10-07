@@ -8,7 +8,7 @@ import 'package:swype/utils/helpers/helper_functions.dart';
 import 'package:swype/utils/preferences/preferences_provider.dart'; // Assuming your color constants
 
 class FaceIdConfirmationScreen extends ConsumerStatefulWidget {
-  const FaceIdConfirmationScreen({Key? key}) : super(key: key);
+  const FaceIdConfirmationScreen({super.key});
 
   @override
   _FaceIdConfirmationScreenState createState() =>

@@ -46,7 +46,7 @@ class Candidate {
   String? appleId;
   int? twoFactorAuthentication;
   String? preferredLanguage;
-  List<String>? images;
+  List<dynamic>? images;
 
   Candidate(
       {this.id,
@@ -146,7 +146,7 @@ class Candidate {
     appleId = json['apple_id'] ?? '';
     twoFactorAuthentication = json['two_factor_authentication'] ?? 0;
     preferredLanguage = json['preferred_language'] ?? '';
-    images = json['images'] ?? [];
+    images = json['photos'] ?? [];
   }
 
   Map<String, dynamic> toJson() {
@@ -198,7 +198,7 @@ class Candidate {
     data['apple_id'] = appleId;
     data['two_factor_authentication'] = twoFactorAuthentication;
     data['preferred_language'] = preferredLanguage;
-    data['images'] = images ?? [];
+    data['photos'] = images ?? [];
 
     return data;
   }

@@ -97,7 +97,13 @@ class LoginController {
 
         if (response.statusCode == 200) {
           final data = response.data;
-          if (data['status_code'] == 200) {
+          if (data["status_code"] == 400) {
+            CHelperFunctions.showToaster(
+              context,
+              "User not found with this email",
+            );
+            return false;
+          } else if (data['status_code'] == 200) {
             final authToken = data['data']['access_token'];
             final userId = data['data']['user']['id'];
             ref.read(authProvider.notifier).login(authToken, '$userId');

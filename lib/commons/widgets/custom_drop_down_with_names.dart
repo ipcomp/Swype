@@ -9,12 +9,12 @@ class CustomDropdownBottomSheetWithNames extends StatefulWidget {
   final Function(String) onItemSelected;
 
   const CustomDropdownBottomSheetWithNames({
-    Key? key,
+    super.key,
     required this.title,
     required this.items,
     required this.initialValue,
     required this.onItemSelected,
-  }) : super(key: key);
+  });
 
   @override
   _CustomDropdownBottomSheetState createState() =>
