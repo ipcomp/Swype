@@ -21,7 +21,6 @@ class AllUsersNotifier extends StateNotifier<List<Map<String, dynamic>>?> {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['status_code'] == 200) {
-          // Explicitly cast to List<Map<String, dynamic>>
           final List<Map<String, dynamic>> userList =
               List<Map<String, dynamic>>.from(data['data']);
 

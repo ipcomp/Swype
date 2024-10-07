@@ -17,12 +17,12 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
           'isRegistered': false,
           'isOtpVerified': false,
           'isDetailsFilled': false,
+          'isLocationUpdated': false,
           'isPreferencesUpdated': false,
         }) {
     loadUser();
   }
 
-  // Load user data from SharedPreferences
   Future<void> loadUser() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -33,6 +33,7 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     final isRegistered = prefs.getBool('isRegistered') ?? false;
     final isOtpVerified = prefs.getBool('isOtpVerified') ?? false;
     final isDetailsFilled = prefs.getBool('isDetailsFilled') ?? false;
+    final isLocationUpdated = prefs.getBool('isLocationUpdated') ?? false;
     final isPreferencesUpdated = prefs.getBool('isPreferencesUpdated') ?? false;
 
     state = {
@@ -44,11 +45,11 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
       'isRegistered': isRegistered,
       'isOtpVerified': isOtpVerified,
       'isDetailsFilled': isDetailsFilled,
-      'isPreferencesUpdated': isPreferencesUpdated, // Set in state
+      'isLocationUpdated': isLocationUpdated,
+      'isPreferencesUpdated': isPreferencesUpdated,
     };
   }
 
-  // Save user information (including token, name, email, and phone)
   Future<void> saveUserInfo(
       String token, String id, String name, String email, String phone) async {
     final prefs = await SharedPreferences.getInstance();
@@ -68,7 +69,6 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     };
   }
 
-  // Update isRegistered
   Future<void> updateIsRegistered(bool isRegistered) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isRegistered', isRegistered);
@@ -78,7 +78,6 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     };
   }
 
-  // Update isOtpVerified
   Future<void> updateIsOtpVerified(bool isOtpVerified) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isOtpVerified', isOtpVerified);
@@ -88,7 +87,6 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     };
   }
 
-  // Update isDetailsFilled
   Future<void> updateIsDetailsFilled(bool isDetailsFilled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isDetailsFilled', isDetailsFilled);
@@ -98,17 +96,24 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     };
   }
 
-  // Update isPreferencesUpdated
+  Future<void> updateIsLocationUpdated(bool isLocationUpdated) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLocationUpdated', isLocationUpdated);
+    state = {
+      ...state,
+      'isLocationUpdated': isLocationUpdated,
+    };
+  }
+
   Future<void> updateIsPreferencesUpdated(bool isPreferencesUpdated) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isPreferencesUpdated', isPreferencesUpdated);
     state = {
       ...state,
-      'isPreferencesUpdated': isPreferencesUpdated, // Update state
+      'isPreferencesUpdated': isPreferencesUpdated,
     };
   }
 
-  // Clear user data (logout)
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
@@ -118,6 +123,7 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
     await prefs.remove('isRegistered');
     await prefs.remove('isOtpVerified');
     await prefs.remove('isDetailsFilled');
+    await prefs.remove('isLocationUpdated');
     await prefs.remove('isPreferencesUpdated');
     state = {
       'token': null,
@@ -127,6 +133,7 @@ class RegisterStateNotifier extends StateNotifier<Map<String, dynamic>> {
       'isRegistered': false,
       'isOtpVerified': false,
       'isDetailsFilled': false,
+      'isLocationUpdated': false,
       'isPreferencesUpdated': false,
     };
   }

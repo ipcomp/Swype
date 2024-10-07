@@ -108,6 +108,7 @@ class LoginController {
             final userId = data['data']['user']['id'];
             ref.read(authProvider.notifier).login(authToken, '$userId');
             ref.read(userProvider.notifier).setUser(data['data']['user']);
+            ref.read(allUsersProvider.notifier).fetchUserList();
             CHelperFunctions.showToaster(context, data['message']);
             return true;
           } else {

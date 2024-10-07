@@ -43,6 +43,7 @@ class Candidate {
   int? agreedToTerms;
   String? googleId;
   String? facebookId;
+  int? distance;
   String? appleId;
   int? twoFactorAuthentication;
   String? preferredLanguage;
@@ -89,6 +90,7 @@ class Candidate {
       this.phoneVerificationCode,
       this.phoneVerified,
       this.isOnline,
+      this.distance,
       this.lastOnlineTime,
       this.agreedToTerms,
       this.googleId,
@@ -142,6 +144,7 @@ class Candidate {
     lastOnlineTime = json['last_online_time'] ?? '';
     agreedToTerms = json['agreed_to_terms'] ?? 0;
     googleId = json['google_id'] ?? '';
+    distance = json['distance'] ?? 0;
     facebookId = json['facebook_id'] ?? '';
     appleId = json['apple_id'] ?? '';
     twoFactorAuthentication = json['two_factor_authentication'] ?? 0;

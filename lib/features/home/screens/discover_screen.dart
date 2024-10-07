@@ -397,7 +397,7 @@ class _ExampleCardState extends State<ExampleCard> {
     final user = widget.user;
     final username = user.username;
     final age = user.age;
-    final country = user.profession;
+    final distance = user.distance;
     final imgUrl = user.profilePictureUrl;
     final textDirection = Directionality.of(context);
     final isSwiping = widget.isSwiping;
@@ -411,7 +411,13 @@ class _ExampleCardState extends State<ExampleCard> {
 
     final allImages = [imgUrl, ...userImages];
 
-    void _handleTap(Offset localPosition) {
+    for (var imageUrl in allImages) {
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        precacheImage(NetworkImage(imageUrl), context);
+      }
+    }
+
+    void handleTap(Offset localPosition) {
       final width = MediaQuery.of(context).size.width;
 
       if (localPosition.dx < width / 2) {
@@ -423,7 +429,7 @@ class _ExampleCardState extends State<ExampleCard> {
 
     return GestureDetector(
       onTapDown: (TapDownDetails details) {
-        _handleTap(details.localPosition);
+        handleTap(details.localPosition);
       },
       child: Card(
         elevation: 5,
@@ -452,9 +458,9 @@ class _ExampleCardState extends State<ExampleCard> {
               Directionality(
                 textDirection: TextDirection.ltr,
                 child: Positioned(
-                  top: 5,
-                  left: 5,
-                  right: 5,
+                  top: 10,
+                  left: 30,
+                  right: 30,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(allImages.length, (index) {
@@ -464,8 +470,8 @@ class _ExampleCardState extends State<ExampleCard> {
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           decoration: BoxDecoration(
                             color: index == widget.currentImageIndex
-                                ? CColors.primary.withOpacity(0.7)
-                                : Colors.grey,
+                                ? CColors.primary
+                                : const Color(0xFF7D8A88),
                             borderRadius: BorderRadius.circular(5),
                           ),
                         ),
@@ -594,13 +600,26 @@ class _ExampleCardState extends State<ExampleCard> {
                           ),
                         ],
                       ),
-                      Text(
-                        country ?? 'NA',
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 16,
-                        ),
-                      ),
+                      SizedBox(height: 5),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            "assets/svg/location.svg",
+                            colorFilter: const ColorFilter.mode(
+                              Colors.white,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            '$distance km away',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      )
                     ],
                   ),
                 ),

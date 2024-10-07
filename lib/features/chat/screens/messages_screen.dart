@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:swype/commons/widgets/back_button_transparent_bg.dart';
 import 'package:swype/commons/widgets/match_avatar_widget.dart';
 import 'package:swype/features/chat/models/message_modal.dart';
 import 'package:swype/features/chat/models/messages_data.dart';
@@ -70,7 +69,7 @@ class MessagesScreenState extends ConsumerState<MessagesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    TextDirection textDirection = Directionality.of(context);
+    // TextDirection textDirection = Directionality.of(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: appBar(isOnline),

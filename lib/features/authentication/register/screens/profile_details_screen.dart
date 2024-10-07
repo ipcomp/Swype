@@ -9,14 +9,13 @@ import 'package:swype/features/authentication/providers/auth_provider.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/images_screen.dart';
-import 'package:swype/features/authentication/register/screens/user_preferences.dart';
+import 'package:swype/features/authentication/register/screens/update_location.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/dio/dio_client.dart';
 import 'dart:io';
 
 import 'package:swype/utils/helpers/helper_functions.dart';
-import 'package:swype/utils/preferences/preferences_provider.dart';
 
 class ProfileDetailsScreen extends ConsumerStatefulWidget {
   const ProfileDetailsScreen({super.key});
@@ -76,16 +75,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
 
   // Handle image picker
   Future<void> _pickImage() async {
-    // final ImagePicker picker = ImagePicker();
-    // final XFile? pickedImage =
-    //     await picker.pickImage(source: ImageSource.gallery);
-
-    // if (pickedImage != null) {
-    //   setState(() {
-    //     _profileImage = pickedImage;
-    //   });
-    // }
-
     final List<XFile?> selectedImages = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -215,7 +204,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
             await authNotifier.login(user['token'], '${user['id']}');
             ref.read(userProvider.notifier).setUser(data['data']['user']);
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) => const UserPreferences()),
+              MaterialPageRoute(builder: (context) =>  UpdateLocation()),
               (Route<dynamic> route) => false,
             );
           } else {
@@ -233,110 +222,6 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
       }
     }
   }
-
-  // void _submitProfileDetails() async {
-  //   if (!_formKey.currentState!.validate()) return;
-
-  //   if (selectedDate == null) {
-  //     CHelperFunctions.showToaster(context, 'Please choose your birthday date');
-  //     return;
-  //   }
-
-  //   String? genderInEnglish = _mapGenderToEnglish(selectedGender);
-  //   if (genderInEnglish == null) return;
-
-  //   if (_profileImage == null) {
-  //     CHelperFunctions.showToaster(context, 'Please upload a profile image');
-  //     return;
-  //   }
-
-  //   FocusScope.of(context).unfocus();
-  //   setState(() => _isLoading = true);
-
-  //   try {
-  //     final user = ref.read(registerProvider);
-  //     await _updateUserProfile(user, genderInEnglish);
-  //     await _uploadRemainingImages();
-
-  //     // Navigate if both profile and images upload are successful
-  //     Navigator.of(context).pushAndRemoveUntil(
-  //       MaterialPageRoute(builder: (context) => const UserPreferences()),
-  //       (Route<dynamic> route) => false,
-  //     );
-  //   } catch (e) {
-  //     print('Error: $e');
-  //     CHelperFunctions.showToaster(context, 'Error updating profile');
-  //   } finally {
-  //     setState(() => _isLoading = false);
-  //   }
-  // }
-
-  // String? _mapGenderToEnglish(String? gender) {
-  //   Map<String, String> genderMapping = {
-  //     'זכר': 'male',
-  //     'נקבה': 'female',
-  //     'אחרים': 'others',
-  //   };
-
-  //   if (genderMapping.containsKey(gender)) {
-  //     return genderMapping[gender];
-  //   } else {
-  //     CHelperFunctions.showToaster(context, 'Invalid gender selected');
-  //     return null;
-  //   }
-  // }
-
-  // Future<void> _updateUserProfile(
-  //     Map<String, dynamic> user, String? gender) async {
-  //   FormData formData = FormData.fromMap({
-  //     'username': user['name'],
-  //     'email': user['email'],
-  //     'phone': user['phone'],
-  //     'first_name': firstNameController.text,
-  //     'last_name': lastNameController.text,
-  //     'gender': gender,
-  //     'date_of_birth': selectedDate != null
-  //         ? DateFormat('yyyy-MM-dd').format(selectedDate!)
-  //         : null,
-  //     'profile_picture': await MultipartFile.fromFile(_profileImage!.path),
-  //   });
-
-  //   final response = await dio.post(
-  //     ApiRoutes.updateUser,
-  //     data: formData,
-  //     options: Options(
-  //       contentType: 'multipart/form-data',
-  //       headers: {
-  //         'Authorization': 'Bearer ${user['token']}',
-  //       },
-  //     ),
-  //   );
-
-  //   if (response.statusCode != 200 || response.data['status_code'] != 200) {
-  //     throw Exception(response.data['message'] ?? 'Error updating profile');
-  //   }
-  // }
-
-  // Future<void> _uploadRemainingImages() async {
-  //   if (_remainingImages.isEmpty) return;
-
-  //   FormData imageData = FormData();
-  //   for (var image in _remainingImages) {
-  //     final file = File(image!.path);
-  //     imageData.files
-  //         .add(MapEntry('images[]', await MultipartFile.fromFile(file.path)));
-  //   }
-
-  //   final result = await dioClient.postWithFormData(
-  //     ApiRoutes.uploadImages,
-  //     imageData,
-  //   );
-  //   final data = result.data;
-  //   print(data);
-  //   if (result.statusCode != 200) {
-  //     throw Exception('Error uploading images');
-  //   }
-  // }
 
   @override
   void dispose() {
