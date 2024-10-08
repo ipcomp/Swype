@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:swype/features/home/data/user_model.dart';
+import 'package:swype/features/home/widgets/profile_bottom_sheet.dart';
 import 'package:swype/utils/constants/colors.dart';
+import 'package:vibration/vibration.dart';
 
 class Usercard extends ConsumerStatefulWidget {
   final Candidate user;
@@ -11,6 +14,9 @@ class Usercard extends ConsumerStatefulWidget {
   final int currentImageIndex;
   final Function nextImage;
   final Function prevImage;
+  final CardSwiperController controller;
+  final int swipingCardIndex;
+  final allUser;
 
   const Usercard(
     this.user, {
@@ -20,6 +26,9 @@ class Usercard extends ConsumerStatefulWidget {
     required this.currentImageIndex,
     required this.nextImage,
     required this.prevImage,
+    required this.controller,
+    required this.swipingCardIndex,
+    required this.allUser,
   });
 
   @override
@@ -52,8 +61,12 @@ class _UsercardState extends ConsumerState<Usercard> {
       }
     }
 
-    void handleTap(Offset localPosition) {
+    void handleTap(Offset localPosition) async {
       final width = MediaQuery.of(context).size.width;
+
+      if (await Vibration.hasVibrator() != null) {
+        Vibration.vibrate(duration: 50);
+      }
 
       if (localPosition.dx < width / 2) {
         widget.prevImage();
@@ -195,69 +208,92 @@ class _UsercardState extends ConsumerState<Usercard> {
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(15.0),
-                      bottomRight: Radius.circular(15.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 15,
                     ),
-                    color: Colors.black.withOpacity(0.8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(15.0),
+                        bottomRight: Radius.circular(15.0),
+                      ),
+                      color: Colors.black.withOpacity(0.8),
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          backgroundColor: Colors.white,
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(16),
+                            ),
+                          ),
+                          builder: (BuildContext context) {
+                            return ProfileBottomSheet(
+                              user: Candidate.fromJson(
+                                widget.allUser![widget.swipingCardIndex],
+                              ),
+                              controller: widget.controller,
+                            );
+                          },
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "$username",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                "$username",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const Text(
+                                ', ',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "$age",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
-                          const Text(
-                            ', ',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            "$age",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              SvgPicture.asset(
+                                "assets/svg/location.svg",
+                                colorFilter: const ColorFilter.mode(
+                                  Colors.white,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                '$distance km away',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
-                      SizedBox(height: 5),
-                      Row(
-                        children: [
-                          SvgPicture.asset(
-                            "assets/svg/location.svg",
-                            colorFilter: const ColorFilter.mode(
-                              Colors.white,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Text(
-                            '$distance km away',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                ),
+                    )),
               ),
             ],
           ),

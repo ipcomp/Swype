@@ -12,8 +12,9 @@ import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/otp_verification_screen.dart';
 import 'package:swype/features/authentication/register/screens/profile_details_screen.dart';
-import 'package:swype/features/authentication/register/screens/update_location.dart';
 import 'package:swype/features/authentication/register/screens/user_preferences.dart';
+import 'package:swype/features/home/controllers/discover_controller.dart';
+import 'package:swype/features/home/providers/potential_matches_provider.dart';
 import 'package:swype/features/home/screens/discover_screen.dart';
 import 'package:swype/features/settings/screens/language/language_selection_screen.dart';
 import 'package:swype/routes/api_routes.dart';
@@ -24,6 +25,7 @@ import 'package:swype/utils/preferences/preferences_provider.dart';
 class SplashController {
   final WidgetRef ref;
   DioClient dioClient = DioClient();
+  DiscoverController discoverController = DiscoverController();
   final LocalAuthentication auth = LocalAuthentication();
 
   SplashController(this.ref);
@@ -42,7 +44,7 @@ class SplashController {
     final isRegistered = userState['isRegistered'];
     final isOtpVerified = userState['isOtpVerified'];
     final isDetailsFilled = userState['isDetailsFilled'];
-    final isLocationUpdated = userState['isLocationUpdated'];
+    // final isLocationUpdated = userState['isLocationUpdated'];
     final isPreferencesUpdated = userState['isPreferencesUpdated'];
 
     if (prefs.preferredLanguage == '') {
@@ -74,17 +76,6 @@ class SplashController {
     } else if (isRegistered &&
         isOtpVerified &&
         isDetailsFilled &&
-        !isLocationUpdated) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UpdateLocation(),
-        ),
-      );
-    } else if (isRegistered &&
-        isOtpVerified &&
-        isDetailsFilled &&
-        isLocationUpdated &&
         !isPreferencesUpdated) {
       Navigator.pushReplacement(
         context,
@@ -95,11 +86,14 @@ class SplashController {
     } else if (isAuthenticated) {
       String? token = await getAuthToken();
       if (token != null) {
-        print("Token: " + token);
         ref.read(allUsersProvider.notifier).fetchUserList(token);
+        final List<Map<String, dynamic>>? matches =
+            await discoverController.fetchPotentialMatches(context);
+        ref
+            .read(potentialMatchesProvider.notifier)
+            .setPotentialMatches(matches!);
       } else {
         print("Getting token null");
-        ;
       }
 
       final response = await dioClient.get(

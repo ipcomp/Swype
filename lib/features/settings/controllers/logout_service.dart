@@ -6,6 +6,7 @@ import 'package:swype/features/authentication/login/screens/onboarding/onboardin
 import 'package:swype/features/authentication/providers/auth_provider.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
+import 'package:swype/features/home/providers/potential_matches_provider.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/dio/dio_client.dart';
 
@@ -27,8 +28,9 @@ class LogoutService {
           );
           await ref.read(authProvider.notifier).logout();
           await ref.read(registerProvider.notifier).logout();
+          ref.read(potentialMatchesProvider.notifier).clearPotentialMatches();
           ref.read(userProvider.notifier).clearUser();
-          
+
           return true;
         } else {
           return false;

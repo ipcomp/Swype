@@ -40,7 +40,6 @@ class AllUsersNotifier extends StateNotifier<List<Map<String, dynamic>>?> {
         throw Exception(
             'Failed to load user list, response code: ${response.statusCode}');
       }
-      print(response);
     } catch (e) {
       print('Error fetching user list: $e');
       state = null; // Optionally reset the state to null on error

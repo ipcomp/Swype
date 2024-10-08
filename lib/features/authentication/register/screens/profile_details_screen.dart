@@ -8,8 +8,9 @@ import 'package:swype/commons/widgets/custom_drop_down_with_names.dart';
 import 'package:swype/features/authentication/providers/auth_provider.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
+import 'package:swype/features/authentication/register/screens/add_additional_profile_data.dart';
 import 'package:swype/features/authentication/register/screens/images_screen.dart';
-import 'package:swype/features/authentication/register/screens/update_location.dart';
+import 'package:swype/features/authentication/register/screens/user_preferences.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/dio/dio_client.dart';
@@ -26,7 +27,7 @@ class ProfileDetailsScreen extends ConsumerStatefulWidget {
 
 class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     with SingleTickerProviderStateMixin {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // Use FormState
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
   late AnimationController _controller;
@@ -203,8 +204,14 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
             await registerNotifier.updateIsDetailsFilled(true);
             await authNotifier.login(user['token'], '${user['id']}');
             ref.read(userProvider.notifier).setUser(data['data']['user']);
+            // Navigator.of(context).pushAndRemoveUntil(
+            //   MaterialPageRoute(builder: (context) => const UserPreferences()),
+            //   (Route<dynamic> route) => false,
+            // );
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (context) =>  UpdateLocation()),
+              MaterialPageRoute(
+                builder: (context) => const AddAdditionalProfileData(),
+              ),
               (Route<dynamic> route) => false,
             );
           } else {
