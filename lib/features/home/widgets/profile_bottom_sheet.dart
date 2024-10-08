@@ -395,21 +395,41 @@ class _ProfileBottomSheetState extends ConsumerState<ProfileBottomSheet> {
 
 Widget _buildOtherDetails(
     Candidate user, Map<String, List<Map<String, dynamic>>> userOptions) {
-  String education =
-      userOptions['education']?[user.education ?? 0]['name'].toString() ?? 'NA';
-  String bodyType =
-      userOptions['body_type']?[user.bodyType ?? 0]['name'].toString() ?? 'NA';
-  String maritalStatus = userOptions['marital_status']?[user.maritalStatus ?? 0]
-              ['name']
-          .toString() ??
-      'NA';
-  String smokingHabits = userOptions['smoking_habits']?[user.smokingHabits ?? 0]
-              ['name']
-          .toString() ??
-      'NA';
-  String drinkingHabits =
-      userOptions['drinking_habits']?[user.bodyType ?? 0]['name'].toString() ??
-          'NA';
+  String education = (userOptions['education'] as List)
+      .firstWhere(
+        (edu) => edu['id'] == user.education,
+        orElse: () => {'name': 'NA'},
+      )['name']
+      .toString();
+
+  String bodyType = (userOptions['body_type'] as List)
+      .firstWhere(
+        (type) => type['id'] == user.bodyType,
+        orElse: () => {'name': 'NA'},
+      )['name']
+      .toString();
+
+  String maritalStatus = (userOptions['marital_status'] as List)
+      .firstWhere(
+        (status) => status['id'] == user.maritalStatus,
+        orElse: () => {'name': 'NA'},
+      )['name']
+      .toString();
+
+  String smokingHabits = (userOptions['smoking_habits'] as List)
+      .firstWhere(
+        (habit) => habit['id'] == user.smokingHabits,
+        orElse: () => {'name': 'NA'},
+      )['name']
+      .toString();
+
+  String drinkingHabits = (userOptions['drinking_habits'] as List)
+      .firstWhere(
+        (habit) => habit['id'] == user.drinkingHabits,
+        orElse: () => {'name': 'NA'},
+      )['name']
+      .toString();
+
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [

@@ -1,5 +1,6 @@
 import 'dart:io'; // To work with File images
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -84,36 +85,22 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                   height: 170,
                   width: 170,
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(25),
-                    child: images[0] != null
-                        ? Image(
-                            image: FileImage(File(images[0]!.path)),
-                            fit: BoxFit.cover,
-                            loadingBuilder: (BuildContext context, Widget child,
-                                ImageChunkEvent? loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              } else {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes !=
-                                            null
-                                        ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                            (loadingProgress
-                                                    .expectedTotalBytes ??
-                                                1)
-                                        : null,
-                                  ),
-                                ); // Show loading indicator while image is loading
-                              }
-                            },
-                          )
-                        : Image.asset(
-                            'assets/images/blank.png',
-                            fit: BoxFit.cover,
-                          ),
-                  ),
+                      borderRadius: BorderRadius.circular(25),
+                      child: isLoading[0] == false
+                          ? Image(
+                              image: FileImage(File(
+                                  images[0] == null ? '' : images[0]!.path)),
+                              fit: BoxFit.cover,
+                              errorBuilder: (BuildContext context, Object error,
+                                  StackTrace? stackTrace) {
+                                // Handle any error that occurs during loading
+                                return Image.asset(
+                                  'assets/images/blank.png',
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                            )
+                          : const Center(child: CircularProgressIndicator())),
                 ),
                 // Camera Icon to Edit Main Image
                 Positioned(
@@ -139,7 +126,10 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                         ),
                         child: TextButton(
                           onPressed: () {
-                            _pickImage(0); // Pick image for main container
+                            setState(() {
+                              isLoading[0] = true;
+                            });
+                            _pickImage(0);
                           },
                           style: TextButton.styleFrom(
                             padding: EdgeInsets.zero,
@@ -185,18 +175,39 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                           height: 145,
                           width: 200,
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: images[imageIndex] != null
-                                ? Image.file(
-                                    File(images[imageIndex]!.path),
-                                    fit: BoxFit.cover,
-                                  )
-                                : Center(
-                                    child: Container(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                          ),
+                              borderRadius: BorderRadius.circular(20),
+                              child: isLoading[imageIndex] == false
+                                  ? Image(
+                                      image: FileImage(File(
+                                          images[imageIndex] == null
+                                              ? ''
+                                              : images[imageIndex]!.path)),
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (BuildContext context,
+                                          Object error,
+                                          StackTrace? stackTrace) {
+                                        // Handle any error that occurs during loading
+                                        return Center(
+                                          child: Container(
+                                            color: Colors.white,
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : const Center(
+                                      child: CircularProgressIndicator())
+
+                              //  images[imageIndex] != null
+                              //     ? Image.file(
+                              //         File(images[imageIndex]!.path),
+                              //         fit: BoxFit.cover,
+                              //       )
+                              //     : Center(
+                              //         child: Container(
+                              //           color: Colors.white,
+                              //         ),
+                              //       ),
+                              ),
                         ),
                       ),
                       // Camera Icon to Edit Main Image
@@ -217,7 +228,10 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                             ),
                             child: TextButton(
                               onPressed: () {
-                                _pickImage(index);
+                                setState(() {
+                                  isLoading[imageIndex] = true;
+                                });
+                                _pickImage(imageIndex);
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
@@ -234,6 +248,9 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                                   width: 20,
                                 ),
                                 onPressed: () {
+                                  setState(() {
+                                    isLoading[imageIndex] = true;
+                                  });
                                   _pickImage(imageIndex);
                                 },
                               ),
@@ -257,7 +274,10 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                             ),
                             child: TextButton(
                               onPressed: () {
-                                _pickImage(index);
+                                setState(() {
+                                  isLoading[imageIndex] = true;
+                                });
+                                _pickImage(imageIndex);
                               },
                               style: TextButton.styleFrom(
                                 padding: EdgeInsets.zero,
@@ -274,6 +294,9 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
                                   width: 14,
                                 ),
                                 onPressed: () {
+                                  setState(() {
+                                    isLoading[imageIndex] = true;
+                                  });
                                   _pickImage(imageIndex);
                                 },
                               ),
@@ -312,7 +335,7 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
   }
 
   // Image picker function for picking images
-  Future<void> _pickImage(int index) async {
+  /* Future<void> _pickImage(int index) async {
     final ImagePicker picker = ImagePicker();
 
     final XFile? pickedImage = await picker.pickImage(
@@ -350,8 +373,73 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
       }
     }
   }
-}
+}*/
+  Future<void> _pickImage(int index) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedImage =
+        await picker.pickImage(source: ImageSource.gallery);
 
+    if (pickedImage != null) {
+      File imageFile = File(pickedImage.path);
+      Uint8List imageBytes = await imageFile.readAsBytes();
+
+      setState(() {
+        isLoading[index] = true;
+      });
+
+      int targetSizeInBytes = 2 * 1024 * 1024; // 2 MB
+      List<int>? compressedImageBytes;
+      int quality = 85;
+
+      // Determine the image format from the file extension (handle null or unknown formats)
+      String? extension = pickedImage.name.split('.').last.toLowerCase();
+      CompressFormat? format;
+
+      if (extension == 'png') {
+        format = CompressFormat.png;
+        // Resize instead of compress for PNG
+        compressedImageBytes = await FlutterImageCompress.compressWithList(
+          imageBytes,
+          minWidth: 512,
+          minHeight: 512,
+          format: format,
+        );
+      } else if (extension == 'jpg' || extension == 'jpeg') {
+        format = CompressFormat.jpeg;
+        // JPEG: Use quality-based compression
+        do {
+          compressedImageBytes = await FlutterImageCompress.compressWithList(
+            imageBytes,
+            minWidth: 512, // Resize as well
+            minHeight: 512,
+            quality: quality,
+            format: format,
+          );
+          quality -= 5; // Reduce quality iteratively
+        } while (
+            compressedImageBytes.length > targetSizeInBytes && quality > 0);
+      } else {
+        // Fallback for unsupported or unknown formats
+        compressedImageBytes = imageBytes;
+      }
+
+      // Write the compressed image back to the file
+      if (compressedImageBytes != null) {
+        await imageFile.writeAsBytes(compressedImageBytes);
+      }
+
+      setState(() {
+        images[index] = XFile(imageFile.path);
+        isLoading[index] = false;
+      });
+    } else {
+      setState(() {
+        isLoading[index] = false;
+      });
+    }
+  }
+}
+/*
 // import 'dart:io'; // To work with File images
 // import 'dart:typed_data'; // For image bytes
 // import 'package:flutter/material.dart';
@@ -685,3 +773,4 @@ class _MediaScreenState extends ConsumerState<MediaScreen>
 //     }
 //   }
 // }
+*/
