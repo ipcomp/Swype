@@ -3,14 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:page_animation_transition/animations/fade_animation_transition.dart';
-import 'package:page_animation_transition/page_animation_transition.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/features/authentication/providers/all_users_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/home/controllers/advanced_search_controller.dart';
 import 'package:swype/features/home/data/user_model.dart';
-import 'package:swype/features/home/screens/update_location_screen.dart';
 import 'package:swype/features/home/widgets/filter_bottom_sheet.dart';
 import 'package:swype/features/home/widgets/profile_bottom_sheet.dart';
 import 'package:swype/features/home/widgets/user_card.dart';
@@ -67,7 +64,6 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
         .toList();
     final translations = CHelperFunctions().getTranslations(ref);
     final textDirection = Directionality.of(context);
-
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(52),
@@ -109,13 +105,13 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        PageAnimationTransition(
-                          page: const UpdateLocationScreen(),
-                          pageAnimationType: FadeAnimationTransition(),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   PageAnimationTransition(
+                      //     page: UpdateLocationScreen(),
+                      //     pageAnimationType: FadeAnimationTransition(),
+                      //   ),
+                      // );
                     },
                     child: Text(
                       currentUser?['current_city'] ?? "Update Location",
@@ -221,6 +217,9 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
                           isSwiping: index == swipingCardIndex,
                           swipeDir: swipeDir,
                           currentImageIndex: currentImageIndex,
+                          controller: controller,
+                          swipingCardIndex: swipingCardIndex,
+                          allUser: allUser,
                           nextImage: () {
                             setState(() {
                               if (currentImageIndex <
@@ -344,6 +343,7 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
                                   user: Candidate.fromJson(
                                     allUser![swipingCardIndex],
                                   ),
+                                  controller: controller,
                                 );
                               },
                             );

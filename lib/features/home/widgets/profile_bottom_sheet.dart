@@ -1,3 +1,4 @@
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
@@ -11,7 +12,9 @@ import 'package:swype/utils/helpers/helper_functions.dart';
 
 class ProfileBottomSheet extends ConsumerStatefulWidget {
   final Candidate user;
-  const ProfileBottomSheet({super.key, required this.user});
+  final CardSwiperController controller;
+  const ProfileBottomSheet(
+      {super.key, required this.user, required this.controller});
 
   @override
   ConsumerState<ProfileBottomSheet> createState() => _ProfileBottomSheetState();
@@ -130,7 +133,12 @@ class _ProfileBottomSheetState extends ConsumerState<ProfileBottomSheet> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () => {},
+                              onTap: () {
+                                Navigator.pop(context);
+                                widget.controller.swipe(
+                                  CardSwiperDirection.left,
+                                );
+                              },
                               child: Container(
                                 height: 78,
                                 width: 78,
@@ -151,7 +159,11 @@ class _ProfileBottomSheetState extends ConsumerState<ProfileBottomSheet> {
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => {},
+                              onTap: () {
+                                Navigator.pop(context);
+                                widget.controller
+                                    .swipe(CardSwiperDirection.right);
+                              },
                               child: Container(
                                 height: 78,
                                 width: 78,
