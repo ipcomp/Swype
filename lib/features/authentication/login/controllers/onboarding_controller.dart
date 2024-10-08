@@ -34,16 +34,16 @@ class OnboardingController {
   // ];
 
   void handleRegister(BuildContext context) {
-    if (currentPage == 2) {
-      Platform.isAndroid
-          ? Navigator.pushReplacementNamed(context, AppRoutes.registerSelector)
-          : Navigator.pushNamed(context, AppRoutes.registerSelector);
-    } else {
-      carouselController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
+    Platform.isAndroid
+        ? Navigator.pushReplacementNamed(context, AppRoutes.registerSelector)
+        : Navigator.pushNamed(context, AppRoutes.registerSelector);
+    // if (currentPage == 2) {
+    // } else {
+    //   carouselController.nextPage(
+    //     duration: const Duration(milliseconds: 300),
+    //     curve: Curves.easeInOut,
+    //   );
+    // }
   }
 
   void handleLoginButton(BuildContext context) {

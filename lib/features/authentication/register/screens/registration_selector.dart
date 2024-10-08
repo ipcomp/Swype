@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:page_animation_transition/animations/fade_animation_transition.dart';
+import 'package:page_animation_transition/page_animation_transition.dart';
 import 'package:swype/features/authentication/login/screens/onboarding/onboarding_screen.dart';
 import 'package:swype/features/authentication/register/controllers/register_controller.dart';
 import 'package:swype/routes/app_routes.dart';
@@ -43,8 +45,9 @@ class RegistrationSelectorState extends ConsumerState<RegistrationSelector> {
         Platform.isAndroid
             ? Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const OnboardingScreen(),
+                PageAnimationTransition(
+                  page: const OnboardingScreen(),
+                  pageAnimationType: FadeAnimationTransition(),
                 ),
               )
             : null;

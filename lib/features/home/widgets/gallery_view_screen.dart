@@ -28,66 +28,74 @@ class _GalleryViewScreenState extends ConsumerState<GalleryViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.only(top: 40, bottom: 24, left: 40),
-            child: AppBar(
-              backgroundColor: Colors.white,
-              leading: Container(
-                height: 52,
-                width: 52,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: CColors.accent),
-                  color: Colors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
                 ),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.chevron_left,
-                    color: CColors.primary,
-                    size: 24,
+                child: AppBar(
+                  backgroundColor: Colors.white,
+                  leading: Container(
+                    height: 52,
+                    width: 52,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: CColors.accent),
+                      color: Colors.white,
+                    ),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.chevron_left,
+                        color: CColors.primary,
+                        size: 24,
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);
+                  automaticallyImplyLeading: false,
+                ),
+              ),
+            ),
+            Expanded(
+              child: CarouselSlider.builder(
+                carouselController: carouselController,
+                options: CarouselOptions(
+                  initialPage: currentIndex,
+                  enlargeCenterPage: true,
+                  enableInfiniteScroll: false,
+                  viewportFraction: 1,
+                  height: double.maxFinite,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      currentIndex = index;
+                    });
                   },
                 ),
-              ),
-              automaticallyImplyLeading: false,
-            ),
-          ),
-          Expanded(
-            child: CarouselSlider.builder(
-              carouselController: carouselController,
-              options: CarouselOptions(
-                initialPage: currentIndex,
-                enlargeCenterPage: true,
-                enableInfiniteScroll: false,
-                viewportFraction: 1,
-                height: double.maxFinite,
-                onPageChanged: (index, reason) {
-                  setState(() {
-                    currentIndex = index;
-                  });
+                itemCount: widget.imageList.length,
+                itemBuilder: (context, index, realIdx) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(0),
+                    child: Image.network(
+                      widget.imageList[index]['photo_url'],
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  );
                 },
               ),
-              itemCount: widget.imageList.length,
-              itemBuilder: (context, index, realIdx) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(0),
-                  child: Image.network(
-                    widget.imageList[index]['photo_url'],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
-                );
-              },
             ),
-          ),
-          const SizedBox(height: 21),
-          _buildThumbnailBar(), // Thumbnail bar at the bottom
-          const SizedBox(height: 55),
-        ],
+            const SizedBox(height: 21),
+            _buildThumbnailBar(), // Thumbnail bar at the bottom
+            const SizedBox(height: 55),
+          ],
+        ),
       ),
     );
   }

@@ -11,6 +11,7 @@ import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/add_additional_profile_data.dart';
 import 'package:swype/features/authentication/register/screens/images_screen.dart';
+import 'package:swype/features/settings/providers/user_options_provider.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/dio/dio_client.dart';
@@ -67,6 +68,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     });
     _controller.forward();
 
+    ref.read(profileOptionsProvider.notifier).fetchProfileOptions();
     Future.microtask(() async {
       final translations = await CHelperFunctions().getTranslations(ref);
       setState(() {
@@ -401,7 +403,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
         return null;
       },
       decoration: InputDecoration(
-        labelText: translations['Date of Birth'] ?? 'Date of Birth',
+        labelText: translations['Date Of Birth'] ?? 'Date of Birth',
         hintText: translations['dd/mm/yyyy'] ?? 'dd/mm/yyyy',
         suffixIcon: _dateController.text.isNotEmpty
             ? IconButton(

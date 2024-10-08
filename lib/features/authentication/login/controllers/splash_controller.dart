@@ -13,8 +13,9 @@ import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/otp_verification_screen.dart';
 import 'package:swype/features/authentication/register/screens/profile_details_screen.dart';
 import 'package:swype/features/authentication/register/screens/user_preferences.dart';
+import 'package:swype/features/chat/controllers/chat_controller.dart';
+import 'package:swype/features/chat/provider/chat_conversations_provider.dart';
 import 'package:swype/features/home/controllers/discover_controller.dart';
-import 'package:swype/features/home/providers/potential_matches_provider.dart';
 import 'package:swype/features/home/screens/discover_screen.dart';
 import 'package:swype/features/settings/screens/language/language_selection_screen.dart';
 import 'package:swype/routes/api_routes.dart';
@@ -26,6 +27,7 @@ class SplashController {
   final WidgetRef ref;
   DioClient dioClient = DioClient();
   DiscoverController discoverController = DiscoverController();
+  ChatController chatController = ChatController();
   final LocalAuthentication auth = LocalAuthentication();
 
   SplashController(this.ref);
@@ -87,15 +89,13 @@ class SplashController {
       String? token = await getAuthToken();
       if (token != null) {
         ref.read(allUsersProvider.notifier).fetchUserList(token);
-        final List<Map<String, dynamic>>? matches =
-            await discoverController.fetchPotentialMatches(context);
+        final conversations = await chatController.fecthConversations();
         ref
-            .read(potentialMatchesProvider.notifier)
-            .setPotentialMatches(matches!);
+            .read(chatConversationProvider.notifier)
+            .loadConversations(conversations);
       } else {
         print("Getting token null");
       }
-
       final response = await dioClient.get(
         '${ApiRoutes.getUser}?user_id=$userId',
       );

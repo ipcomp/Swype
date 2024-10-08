@@ -49,7 +49,6 @@ class RegisterController {
 
       if (response.statusCode == 200) {
         final data = response.data;
-
         if (data['status_code'] == 200) {
           final userNotifier = ref.read(registerProvider.notifier);
           final token = data['data']['access_token'];

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
@@ -7,15 +8,16 @@ import 'package:swype/features/authentication/register/screens/securities/face_i
 import 'package:swype/features/authentication/register/screens/securities/fingerprint_confirmation_screen.dart';
 import 'package:swype/routes/app_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
+import 'package:swype/utils/helpers/helper_functions.dart';
 
-class SecureAccountScreen extends StatefulWidget {
+class SecureAccountScreen extends ConsumerStatefulWidget {
   const SecureAccountScreen({super.key});
 
   @override
   _SecureAccountScreenState createState() => _SecureAccountScreenState();
 }
 
-class _SecureAccountScreenState extends State<SecureAccountScreen> {
+class _SecureAccountScreenState extends ConsumerState<SecureAccountScreen> {
   final LocalAuthentication auth = LocalAuthentication();
   bool _isBiometricSupported = false;
   bool _hasEnrolledBiometrics = false;
@@ -43,6 +45,7 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final translations = CHelperFunctions().getTranslations(ref);
     return Scaffold(
       backgroundColor: Colors.white,
       body: LayoutBuilder(
@@ -66,7 +69,8 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
                         ),
                         const SizedBox(height: 25),
                         Text(
-                          "Secure Your Account",
+                          translations['Secure Your Account'] ??
+                              "Secure Your Account",
                           style: TextStyle(
                             color: CColors.secondary,
                             fontSize: 24,
@@ -95,9 +99,10 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
                                     ),
                                   )
                                 },
-                                child: const Text(
-                                  'Setup Fingerprint',
-                                  style: TextStyle(fontSize: 16),
+                                child: Text(
+                                  translations['Setup Fingerprint'] ??
+                                      'Setup Fingerprint',
+                                  style: const TextStyle(fontSize: 16),
                                 ),
                               ),
                             ),
@@ -117,7 +122,7 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
                                       horizontal: 8.0),
                                   child: Center(
                                     child: Text(
-                                      "Or",
+                                      translations['Or'] ?? "Or",
                                       style: TextStyle(
                                         color: CColors.borderColor,
                                         fontSize: 18,
@@ -150,9 +155,10 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
                                   ),
                                 )
                               },
-                              child: const Text(
-                                'Setup Face ID',
-                                style: TextStyle(fontSize: 16),
+                              child: Text(
+                                translations['Setup Face ID'] ??
+                                    'Setup Face ID',
+                                style: const TextStyle(fontSize: 16),
                               ),
                             ),
                           ),
@@ -168,7 +174,7 @@ class _SecureAccountScreenState extends State<SecureAccountScreen> {
                             );
                           },
                           child: Text(
-                            'Skip',
+                            translations['Skip'] ?? 'Skip',
                             style:
                                 TextStyle(fontSize: 16, color: CColors.primary),
                           ),

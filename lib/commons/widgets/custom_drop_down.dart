@@ -297,7 +297,10 @@ class _CustomDropdownBottomSheetState
     }
 
     return GestureDetector(
-      onTap: () => _showBottomSheet(context),
+      onTap: () {
+        FocusScope.of(context).unfocus();
+        _showBottomSheet(context);
+      },
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: widget.title,

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:swype/commons/widgets/match_avatar_widget.dart';
-import 'package:swype/features/chat/models/message_modal.dart';
-import 'package:swype/features/chat/models/messages_data.dart';
 import 'package:swype/utils/constants/colors.dart';
 
 class MessagesScreen extends ConsumerStatefulWidget {
@@ -17,7 +15,7 @@ class MessagesScreen extends ConsumerStatefulWidget {
 
 class MessagesScreenState extends ConsumerState<MessagesScreen> {
   final TextEditingController _messageController = TextEditingController();
-  List<MessageModel> messages = [];
+  List messages = [];
   bool isLoading = true;
   bool isOnline = true;
 
@@ -25,46 +23,10 @@ class MessagesScreenState extends ConsumerState<MessagesScreen> {
   void initState() {
     super.initState();
     // _fetchChatMessages();
-    initial();
   }
 
-  initial() {
-    messages = MessagesData().msgDummyData;
-    isLoading = false;
-    setState(() {});
-  }
-
-  // Fetch chat messages from the API
-/*  Future<void> _fetchChatMessages() async {
-    try {
-      final response =
-          await ChatApi.getChatMessages(widget.userId); // Call to your API
-      if (response.statusCode == 200) {
-        setState(() {
-          _messages = response.data;
-          isLoading = false;
-        });
-      }
-    } catch (error) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error fetching chat: $error');
-    }
-  }
-*/
   void sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
-    // Send message to the API
-    setState(() {
-      messages.add(MessageModel(
-        text: _messageController.text.trim(),
-        senderId: '0', // Replace with your current user ID logic
-        timestamp: DateTime.now(),
-      ));
-      _messageController.clear();
-    });
-    // ChatApi.sendMessage(widget.userId, _messageController.text.trim());
   }
 
   @override
@@ -108,12 +70,14 @@ appBar(bool isOnline) {
 }
 
 appBarLeft() {
-  return Text('Grace',
-      style: TextStyle(
-          color: CColors.secondary,
-          fontSize: 24,
-          height: 1.5,
-          fontWeight: FontWeight.w700));
+  return Text(
+    'Grace',
+    style: TextStyle(
+        color: CColors.secondary,
+        fontSize: 24,
+        height: 1.5,
+        fontWeight: FontWeight.w700),
+  );
 }
 
 appBarRight(bool isOnline) {
@@ -153,8 +117,7 @@ Widget messagesList(bool isLoading, messages) {
               itemCount: messages.length,
               itemBuilder: (context, index) {
                 final message = messages[index];
-                final isCurrentUser =
-                    message.senderId == '0'; // Adjust this logic
+                final isCurrentUser = message.senderId == '0';
 
                 return messageWidget(context, message, isCurrentUser);
               },
@@ -304,10 +267,6 @@ class CustomMenuWidget extends StatelessWidget {
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
       onTap: () {
-        // Show the popup menu
-        final RenderBox overlay =
-            Overlay.of(context).context.findRenderObject() as RenderBox;
-
         showMenu<String>(
           context: context,
           position: RelativeRect.fromLTRB(

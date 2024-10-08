@@ -64,6 +64,7 @@ class _FingerprintConfirmationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final translations = CHelperFunctions().getTranslations(ref);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -81,7 +82,7 @@ class _FingerprintConfirmationScreenState
               ),
               const SizedBox(height: 60),
               Text(
-                "Use Your FInger",
+                translations['Use Your Finger'] ?? "Use Your Finger",
                 style: TextStyle(
                   color: CColors.secondary,
                   fontSize: 24,
@@ -103,9 +104,9 @@ class _FingerprintConfirmationScreenState
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isAuthenticating ? null : _authenticate,
-                  child: const Text(
-                    'Confirm',
-                    style: TextStyle(
+                  child: Text(
+                    translations['Confirm'] ?? 'Confirm',
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:swype/features/authentication/register/controllers/register_controller.dart';
+import 'package:swype/features/authentication/register/screens/terms_of_service.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/constants/image_strings.dart';
 import 'package:swype/utils/helpers/helper_functions.dart';
@@ -349,15 +350,26 @@ class _RegistrationScreenState extends ConsumerState<RegistrationScreen> {
                   ),
                   const SizedBox(width: 10.0),
                   Expanded(
-                    child: Text(
-                      translations[
-                              "These terms and conditions outline the rules and regulations for the use of swype App, located at https://swype.co.il/"] ??
-                          'These terms and conditions outline the rules and regulations for the use of swype App, located at https://swype.co.il/',
-                      style: TextStyle(
-                        color: CColors.textOpacity,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        height: 1.5,
+                    child: GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (BuildContext context) {
+                            return TermsOfServiceBottomSheet();
+                          },
+                        );
+                      },
+                      child: Text(
+                        translations[
+                                "These terms and conditions outline the rules and regulations for the use of swype App, located at https://swype.co.il/"] ??
+                            'These terms and conditions outline the rules and regulations for the use of swype App, located at https://swype.co.il/',
+                        style: TextStyle(
+                          color: CColors.textOpacity,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          height: 1.5,
+                        ),
                       ),
                     ),
                   ),

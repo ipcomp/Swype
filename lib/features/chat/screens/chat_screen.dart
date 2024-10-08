@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
-import 'package:swype/features/chat/models/matches_use_modal.dart';
-import 'package:swype/features/chat/provider/match_user_provider.dart';
+import 'package:swype/features/chat/models/conversations.dart';
+import 'package:swype/features/chat/provider/chat_conversations_provider.dart';
 import 'package:swype/features/chat/screens/messages_screen.dart';
 import 'package:swype/routes/app_routes.dart';
+import 'package:swype/utils/helpers/helper_functions.dart';
 import 'package:swype/utils/constants/colors.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -19,17 +20,22 @@ class ChatScreen extends ConsumerStatefulWidget {
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
-    final matchesUserProvider = ref.watch(matchUserProvider);
+    final conversations = ref.watch(chatConversationProvider);
     final textDirection = Directionality.of(context);
-
-    return Scaffold(
-      appBar: appBar(textDirection),
-      body: chatScreenBody(matchesUserProvider),
-      bottomNavigationBar: customBottomBar(context, AppRoutes.chat, ref),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, d) {
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
+      },
+      child: Scaffold(
+        appBar: appBar(textDirection),
+        body: chatScreenBody(conversations),
+        bottomNavigationBar: customBottomBar(context, AppRoutes.chat, ref),
+      ),
     );
   }
 
-  Widget chatScreenBody(MatchesUserModal matchesUserProvider) {
+  Widget chatScreenBody(List<Conversations> conversations) {
     return SingleChildScrollView(
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         const SizedBox(height: 27),
@@ -37,10 +43,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         const SizedBox(height: 10),
         matchText(),
         const SizedBox(height: 10),
-        matchStatus(matchesUserProvider),
+        matchStatus(conversations),
         messageText(),
         const SizedBox(height: 10),
-        messageListView(matchesUserProvider),
+        messageListView(conversations),
         const SizedBox(height: 10),
       ]),
     );
@@ -64,7 +70,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             color: CColors.secondary,
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            // height: 1.4,
+            height: 1.4,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15),
@@ -92,39 +98,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  // Widget matchStatus() {
-  //   return SizedBox(
-  //     height: 100,
-  //     child: ListView(
-  //       scrollDirection: Axis.horizontal,
-  //       children: [
-  //         const SizedBox(width: 20),
-  //         buildMatchAvatarForStatus('You', 'assets/you.jpg', true, true),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus('Emma', 'assets/emma.jpg', true, false),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus('Ava', 'assets/ava.jpg', true, true),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus(
-  //             'Sophia', 'assets/sophia.jpg', false, false),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus('Sophia', 'assets/sophia.jpg', false, true),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus(
-  //             'Sophia', 'assets/sophia.jpg', false, false),
-  //         const SizedBox(width: 15),
-  //         buildMatchAvatarForStatus(
-  //             'Sophia', 'assets/sophia.jpg', false, false),
-  //         const SizedBox(width: 20),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget matchStatus(MatchesUserModal matchesUserProvider) {
-    // Ensure that matchesUserProvider.matches is not null
-    if (matchesUserProvider.matches == null ||
-        matchesUserProvider.matches!.isEmpty) {
+  Widget matchStatus(List<Conversations> conversations) {
+    if (conversations.isEmpty) {
       return const Center(
         child: Text('No Matches'),
       );
@@ -132,22 +107,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return Column(
       children: [
-        // const SizedBox(height: 20),
         Row(
-          children: matchesUserProvider.matches!.map((match) {
-            // Safely access matchUser and provide default values
-            final matchUser = match.matchUser;
-            final username = matchUser?.username ?? 'NA';
-            final profilePictureUrl = matchUser?.profilePictureUrl ?? 'NA';
+          children: conversations.map((match) {
+            final conversation = match;
+            final username = conversation.name;
+            final profilePictureUrl = conversation.imagePath;
 
             return Row(
               children: [
                 const SizedBox(width: 15),
                 buildMatchAvatarForStatus(
-                    username, profilePictureUrl, true, true),
+                  username!,
+                  profilePictureUrl!,
+                  true,
+                  true,
+                ),
               ],
             );
-          }).toList(), // Convert the Iterable to a List
+          }).toList(),
         ),
         const SizedBox(height: 10),
       ],
@@ -167,35 +144,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     );
   }
 
-  // Widget messageListView() {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(horizontal: 20),
-  //     child: Column(
-  //       children: [
-  //         _buildMessageTile('Emelie', 'You: Hey! What’s up, long time..',
-  //             '23 min', true, true, false),
-  //         const SizedBox(height: 6),
-  //         _buildMessageTile('Abigail', 'Typing..', '27 min', true, true, true),
-  //         const SizedBox(height: 6),
-  //         _buildMessageTile(
-  //             'Elizabeth', 'Ok, see you then.', '33 min', false, false, false),
-  //         const SizedBox(height: 6),
-  //         _buildMessageTile('Penelope', 'You: Hey! What’s up, long time..',
-  //             '50 min', true, false, true),
-  //         const SizedBox(height: 6),
-  //         _buildMessageTile('Chloe', 'You: Hello how are you?', '55 min', false,
-  //             false, false),
-  //         const SizedBox(height: 6),
-  //         _buildMessageTile('Grace', 'You: Great I will write later', '1 hour',
-  //             true, false, false),
-  //       ],
-  //     ),
-  //   );
-  // }
-  Widget messageListView(MatchesUserModal matchesUserProvider) {
+  Widget messageListView(List<Conversations> conversations) {
     // Ensure that matchesUserProvider.matches is not null
-    if (matchesUserProvider.matches == null ||
-        matchesUserProvider.matches!.isEmpty) {
+    if (conversations.isEmpty) {
       return const Center(
         child: Text('No Messages'),
       );
@@ -203,31 +154,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return SingleChildScrollView(
       child: Column(
-        children: matchesUserProvider.matches!.map((match) {
-          // Safely access matchUser and provide default values
-          final matchUser = match.matchUser;
-          final username = matchUser?.username ?? 'NA';
-          final profilePictureUrl = matchUser?.profilePictureUrl ?? 'NA';
+        children: conversations.map((conversation) {
+          final username = conversation.name ?? 'NA';
+          final profilePictureUrl = conversation.imagePath ?? 'NA';
+
+          final createdAt = conversation.lastMsg?.createdAt ??
+              DateTime.now().toIso8601String();
 
           return InkWell(
             onTap: () {
               Navigator.of(context).push(
                 CupertinoPageRoute(
-                    builder: (context) => const MessagesScreen(
-                          userId: '3',
-                        )),
+                  builder: (context) => const MessagesScreen(
+                    userId: '3',
+                  ),
+                ),
               );
             },
             child: Padding(
-              // padding: const EdgeInsets.only(bottom: 6),
               padding:
                   const EdgeInsets.only(left: 20, right: 20, bottom: 6, top: 6),
-
               child: _buildMessageTile(
                 username,
-                'You: Hey! What’s up, long time..',
+                "Hey! It's a Match...",
                 profilePictureUrl,
-                '23 min',
+                CHelperFunctions().customTimeAgo(createdAt),
                 true,
                 true,
                 false,
@@ -469,19 +420,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               fontWeight: isUnread ? FontWeight.w700 : FontWeight.w400,
               fontSize: 14),
         ),
-        if (isUnread)
-          CircleAvatar(
-            radius: 10,
-            backgroundColor: CColors.primary,
-            child: const Text(
-              '1',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  height: 1.5,
-                  fontWeight: FontWeight.w700),
-            ),
-          ),
+        // if (isUnread)
+        //   CircleAvatar(
+        //     radius: 10,
+        //     backgroundColor: CColors.primary,
+        //     child: const Text(
+        //       '1',
+        //       style: TextStyle(
+        //         color: Colors.white,
+        //         fontSize: 12,
+        //         height: 1.5,
+        //         fontWeight: FontWeight.w700,
+        //       ),
+        //     ),
+        //   ),
       ],
     );
   }

@@ -380,7 +380,6 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen>
   void dispose() {
     _timer?.cancel();
     cancel();
-    otpController.dispose();
     super.dispose();
   }
 

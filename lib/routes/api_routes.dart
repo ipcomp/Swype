@@ -28,7 +28,8 @@ class ApiRoutes {
   static const String myMatches = '$baseUrl/get-matches-user';
 
   // Chat
-  static const String getMatchesUser = '$baseUrl/get-matches-user';
+  static const String getConversations = '$baseUrl/get-conversations';
+  static const String getMessages = '$baseUrl/get-all-messages';
 
   // Security
   static const String enableTwoFactor = '$baseUrl/enable-two-factor-auth';

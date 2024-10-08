@@ -64,6 +64,7 @@ class _FaceIdConfirmationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final translations = CHelperFunctions().getTranslations(ref);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -81,7 +82,7 @@ class _FaceIdConfirmationScreenState
               ),
               const SizedBox(height: 60),
               Text(
-                "Use Your Face",
+                translations['Use Your Face'] ?? "Use Your Face",
                 style: TextStyle(
                   color: CColors.secondary,
                   fontSize: 24,
@@ -103,9 +104,9 @@ class _FaceIdConfirmationScreenState
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isAuthenticating ? null : _authenticate,
-                  child: const Text(
-                    'Confirm',
-                    style: TextStyle(
+                  child: Text(
+                    translations['Confirm'] ?? 'Confirm',
+                    style: const TextStyle(
                       fontSize: 18,
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

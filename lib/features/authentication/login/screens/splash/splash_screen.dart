@@ -24,7 +24,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   void initState() {
     super.initState();
-
     _splashController = SplashController(ref);
 
     _controller = AnimationController(
