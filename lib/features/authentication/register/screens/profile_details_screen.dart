@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
@@ -10,7 +11,6 @@ import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/add_additional_profile_data.dart';
 import 'package:swype/features/authentication/register/screens/images_screen.dart';
-import 'package:swype/features/authentication/register/screens/user_preferences.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/constants/colors.dart';
 import 'package:swype/utils/dio/dio_client.dart';
@@ -30,9 +30,10 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController firstNameController = TextEditingController();
   final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController _dateController = TextEditingController();
+
   late AnimationController _controller;
   String selectedGender = 'Male';
-  DateTime? selectedDate;
   XFile? _profileImage;
   List<XFile?> _remainingImages = [];
   Dio dio = Dio();
@@ -48,6 +49,8 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
+
+    _dateController.addListener(_onDateChanged);
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
@@ -92,50 +95,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     }
   }
 
-  // Handle date picker for birthday
-  Future<void> _selectDate(BuildContext context, translations) async {
-    final DateTime today = DateTime.now();
-    final DateTime eighteenYearsAgo =
-        DateTime(today.year - 18, today.month, today.day);
-
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: eighteenYearsAgo,
-      firstDate: DateTime(1900),
-      lastDate: eighteenYearsAgo,
-      helpText:
-          translations['Select Your Birth Date'] ?? 'Select Your Birth Date',
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: CColors.primary,
-              onPrimary: Colors.white,
-              onSurface: CColors.textOpacity,
-            ),
-            dialogBackgroundColor: Colors.white,
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (picked != null && picked != selectedDate) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
   // // Submit profile details
   void _submitProfileDetails(translations) async {
     if (_formKey.currentState!.validate()) {
-      if (selectedDate == null) {
-        CHelperFunctions.showToaster(
-            context, 'Please choose your birthday date');
-        return;
-      }
-
       if (_profileImage == null) {
         CHelperFunctions.showToaster(context, 'Please upload a profile image');
         return;
@@ -145,6 +107,9 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
       setState(() {
         _isLoading = true;
       });
+
+      String reversedDate =
+          '${_dateController.text.split('/')[2]}-${_dateController.text.split('/')[1]}-${_dateController.text.split('/')[0]}';
 
       try {
         final registerNotifier = ref.read(registerProvider.notifier);
@@ -161,9 +126,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
               : selectedGender == translations['Female']
                   ? "female"
                   : "other",
-          'date_of_birth': selectedDate != null
-              ? DateFormat('yyyy-MM-dd').format(selectedDate!)
-              : null,
+          'date_of_birth': reversedDate,
           'profile_picture': await MultipartFile.fromFile(_profileImage!.path),
         });
 
@@ -230,9 +193,20 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
     }
   }
 
+  bool isAgeLessThan18(String dateOfBirth) {
+    final birthDate = DateFormat('dd/MM/yyyy').parse(dateOfBirth);
+    final today = DateTime.now();
+
+    final eighteenYearsAgo = DateTime(today.year - 18, today.month, today.day);
+
+    return birthDate.isAfter(eighteenYearsAgo);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
+    _dateController.dispose();
+
     super.dispose();
   }
 
@@ -368,44 +342,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
                     },
                   ),
                   const SizedBox(height: 21),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: () => _selectDate(context, translations),
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(
-                              color: CColors.primary,
-                            )),
-                        backgroundColor: Colors.white,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset('assets/svg/calender.svg'),
-                            const SizedBox(width: 20),
-                            Text(
-                              selectedDate == null
-                                  ? translations["Choose birthday date"] ??
-                                      'Choose birthday date*'
-                                  : DateFormat('dd/MM/yyyy')
-                                      .format(selectedDate!),
-                              style: TextStyle(
-                                color: CColors.primary,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                  birthDateField(translations),
                   const SizedBox(height: 60),
                   _isLoading
                       ? SizedBox(
@@ -439,6 +376,95 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget birthDateField(translations) {
+    return TextFormField(
+      controller: _dateController,
+      keyboardType: TextInputType.datetime,
+      textInputAction: TextInputAction.done,
+      inputFormatters: [
+        FilteringTextInputFormatter.digitsOnly,
+        LengthLimitingTextInputFormatter(8),
+        DateInputFormatter(),
+      ],
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return translations["Please choose your birthday date"] ??
+              'Please choose your birthday date';
+        }
+        if (isAgeLessThan18(_dateController.text.trim())) {
+          return translations["You need to be 18+ to sign up!"] ??
+              " You need to be 18+ to sign up!";
+        }
+        return null;
+      },
+      decoration: InputDecoration(
+        labelText: translations['Date of Birth'] ?? 'Date of Birth',
+        hintText: translations['dd/mm/yyyy'] ?? 'dd/mm/yyyy',
+        suffixIcon: _dateController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: () => _dateController.clear(),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(19.0),
+                child: SvgPicture.asset(
+                  'assets/svg/calender.svg',
+                ),
+              ),
+      ),
+    );
+  }
+
+  void _onDateChanged() {
+    setState(() {}); // Trigger a rebuild to update the icon
+  }
+}
+
+class DateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    String newText = newValue.text;
+
+    if (newText.isEmpty) {
+      return newValue;
+    }
+
+    newText = newText.replaceAll('/', '');
+
+    if (newText.length >= 1 && int.tryParse(newText.substring(0, 1))! > 3) {
+      return oldValue;
+    }
+    if (newText.length >= 2) {
+      int day = int.tryParse(newText.substring(0, 2)) ?? 0;
+      if (day > 31) {
+        return oldValue;
+      }
+    }
+
+    if (newText.length >= 3 && int.tryParse(newText.substring(2, 3))! > 1) {
+      return oldValue;
+    }
+    if (newText.length >= 4) {
+      int month = int.tryParse(newText.substring(2, 4)) ?? 0;
+      if (month > 12) {
+        return oldValue;
+      }
+    }
+
+    if (newText.length > 2 && newText.length <= 4) {
+      newText = '${newText.substring(0, 2)}/${newText.substring(2)}';
+    } else if (newText.length > 4) {
+      newText =
+          '${newText.substring(0, 2)}/${newText.substring(2, 4)}/${newText.substring(4)}';
+    }
+
+    return TextEditingValue(
+      text: newText,
+      selection: TextSelection.collapsed(offset: newText.length),
     );
   }
 }
