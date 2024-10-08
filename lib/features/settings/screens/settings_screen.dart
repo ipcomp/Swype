@@ -131,7 +131,7 @@ class SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         ),
                                       ),
                                       Text(
-                                        user['email'],
+                                        user['email'] ?? '',
                                         style: TextStyle(
                                           color: CColors.secondary,
                                           fontSize: 14,
