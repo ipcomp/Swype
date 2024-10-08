@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_animation_transition/animations/fade_animation_transition.dart';
 import 'package:page_animation_transition/page_animation_transition.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/register/screens/otp_verification_screen.dart';
 import 'package:swype/features/authentication/register/screens/register_screen.dart';
@@ -127,6 +129,70 @@ class RegisterController {
         }
       } else {
         print(result);
+        return false;
+      }
+    } catch (error) {
+      print(error);
+      return false;
+    }
+  }
+
+  Future<bool> appleSignInMethod(WidgetRef ref, BuildContext context) async {
+    try {
+      // Initiate Apple sign-in
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      String socialId = appleCredential.userIdentifier!;
+      String? email = appleCredential.email; // Can be null
+      String? username = appleCredential.givenName; // First name
+
+      if (email == null) {
+        print('Email is null');
+      }
+      // print('Email: ' + email);
+
+      // print("user name = " + username);
+
+      Map<String, dynamic> requestData = {
+        "social_type": 'Apple',
+        "social_id": "'$socialId'",
+        "email": email,
+      };
+
+      if (username != null && username.isNotEmpty) {
+        requestData["username"] = username;
+      }
+
+      final response =
+          await _dio.post(ApiRoutes.socialLogin, data: requestData);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data["status_code"] == 400) {
+          Navigator.push(
+              context,
+              CupertinoPageRoute(
+                builder: (context) => RegistrationScreen(
+                  email: email,
+                  username: username,
+                  socialId: socialId,
+                  socialType: "Apple",
+                ),
+              ));
+          return false;
+        } else {
+          print(response);
+          CHelperFunctions.showToaster(context, "User already registered");
+          return false;
+        }
+      } else {
+        print(response);
+        CHelperFunctions.showToaster(context, response.data['message']);
         return false;
       }
     } catch (error) {

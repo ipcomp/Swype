@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:swype/features/authentication/login/controllers/login_controller.dart';
 import 'package:swype/features/authentication/login/screens/onboarding/onboarding_screen.dart';
 import 'package:swype/features/home/screens/discover_screen.dart';
@@ -41,8 +42,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
-    } else if (socialType == 'facebook') {
-      // await ref.read(authServiceProvider).facebookSignInMethod();
+    } else if (socialType == 'apple') {
+      final result = await loginController.appleSignInMethod(ref, context);
+      if (result) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const DiscoverScreen()),
+          (Route<dynamic> route) => false,
+        );
+      }
     }
   }
 
@@ -284,7 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           child: InkWell(
                             onTap: () {
-                              // Handle apple sign-in
+                              _socialLogin('apple');
                             },
                             splashColor: Colors.transparent,
                             highlightColor: Colors.transparent,

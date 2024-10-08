@@ -61,6 +61,14 @@
 					<string>com.googleusercontent.apps.22154573806-vm4mh551huvcav9i95d2qeip9qrug823</string>
 				</array>
 			</dict>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>signin.swype</string>
+				</array>
+			</dict>
 		</array>
 		<key>GIDClientID</key>
 		<string>22154573806-vm4mh551huvcav9i95d2qeip9qrug823.apps.googleusercontent.com</string>

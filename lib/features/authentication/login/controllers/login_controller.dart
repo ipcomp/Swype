@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:swype/features/authentication/providers/all_users_provider.dart';
 import 'package:swype/features/authentication/providers/auth_provider.dart';
 import 'package:swype/features/authentication/providers/register_provider.dart';
@@ -128,6 +129,82 @@ class LoginController {
       }
     } catch (error) {
       print(error);
+      return false;
+    }
+  }
+
+  Future<bool> appleSignInMethod(WidgetRef ref, BuildContext context) async {
+    try {
+      // Initiate the Apple Sign-In process
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      if (appleCredential.authorizationCode == "canceled") {
+        return false;
+      }
+
+      String socialId = appleCredential.userIdentifier!;
+      String? email = appleCredential.email; // Can be null
+      String? username = appleCredential.givenName; // First name
+
+      // print("user name = " + username);
+
+      Map<String, dynamic> requestData = {
+        "social_type": 'Apple',
+        "social_id": "'$socialId'",
+        "email": email,
+      };
+
+      if (username != null && username.isNotEmpty) {
+        requestData["username"] = username;
+      }
+
+      final response =
+          await _dio.post(ApiRoutes.socialLogin, data: requestData);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data["status_code"] == 400) {
+          print(response);
+
+          CHelperFunctions.showToaster(
+            context,
+            "User not found with this email",
+          );
+          return false;
+        } else if (data['status_code'] == 200) {
+          final authToken = data['data']['access_token'];
+          final userId = data['data']['user']['id'];
+          ref.read(authProvider.notifier).login(authToken, '$userId');
+          ref.read(userProvider.notifier).setUser(data['data']['user']);
+          ref.read(allUsersProvider.notifier).fetchUserList(authToken);
+          CHelperFunctions.showToaster(context, data['message']);
+          return true;
+        } else {
+          print(data);
+          CHelperFunctions.showToaster(context, data['message']);
+          return false;
+        }
+      } else {
+        print(response);
+
+        CHelperFunctions.showToaster(context, response.data['message']);
+        return false;
+      }
+    } catch (error) {
+      print(error);
+
+      if (error is SignInWithAppleAuthorizationException) {
+        if (error.code == AuthorizationErrorCode.canceled) {
+          return false;
+        }
+      }
+      CHelperFunctions.showToaster(
+          context, "An error occurred while signing in with Apple.");
       return false;
     }
   }

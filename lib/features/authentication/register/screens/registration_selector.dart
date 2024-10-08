@@ -24,8 +24,8 @@ class RegistrationSelectorState extends ConsumerState<RegistrationSelector> {
     if (socialType == 'google') {
       // final result = await loginController.googleSignInMethod(ref, context);
       await registerController.googleSignInMethod(ref, context);
-    } else if (socialType == 'facebook') {
-      // await ref.read(authServiceProvider).facebookSignInMethod();
+    } else if (socialType == 'apple') {
+      await registerController.appleSignInMethod(ref, context);
     }
   }
 
@@ -169,7 +169,7 @@ class RegistrationSelectorState extends ConsumerState<RegistrationSelector> {
                         ),
                         child: InkWell(
                           onTap: () {
-                            // Handle apple sign-in
+                            _socialLogin("apple");
                           },
                           splashColor: Colors.transparent,
                           highlightColor: Colors.transparent,
