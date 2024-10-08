@@ -49,7 +49,7 @@ class _GalleryViewScreenState extends ConsumerState<GalleryViewScreen> {
                     size: 24,
                   ),
                   onPressed: () {
-                    Navigator.pop(context); // Navigate back
+                    Navigator.pop(context);
                   },
                 ),
               ),

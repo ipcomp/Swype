@@ -29,7 +29,7 @@ class UserPreferences extends ConsumerStatefulWidget {
 class _UserPreferencesState extends ConsumerState<UserPreferences> {
   DioClient dioClient = DioClient();
   String selectedGender = 'Girls';
-  double distance = 40;
+  double distance = 10;
   RangeValues ageRange = const RangeValues(20, 50);
   int? selectedrelationship;
   int? selectedCity;
@@ -330,7 +330,7 @@ class _UserPreferencesState extends ConsumerState<UserPreferences> {
                       Slider(
                         value: distance,
                         min: 0,
-                        max: 100,
+                        max: 25,
                         divisions: 100,
                         label: '${distance.round()} km',
                         activeColor: CColors.primary,

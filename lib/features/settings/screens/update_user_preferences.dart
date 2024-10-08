@@ -25,7 +25,7 @@ class _UpdateUserPreferencesState extends ConsumerState<UpdateUserPreferences> {
       UpdateUserOptionsController();
   DioClient dioClient = DioClient();
   String selectedGender = 'Girls';
-  double distance = 40;
+  double distance = 10;
   RangeValues ageRange = const RangeValues(20, 50);
   int? selectedrelationship;
   int? selectedCity;
@@ -59,7 +59,7 @@ class _UpdateUserPreferencesState extends ConsumerState<UpdateUserPreferences> {
             : preferences['preferred_gender'] == "female"
                 ? (currentLang == "en" ? "Girls" : "נשים")
                 : (currentLang == "en" ? "Both" : "אחר");
-        distance = preferences['max_distance']?.toDouble() ?? 40;
+        distance = preferences['max_distance']?.toDouble() ?? 10;
         ageRange = RangeValues(
           preferences['age_range_min'].toDouble() ?? 20,
           preferences['age_range_max'].toDouble() ?? 50,
@@ -285,7 +285,7 @@ class _UpdateUserPreferencesState extends ConsumerState<UpdateUserPreferences> {
                       Slider(
                         value: distance,
                         min: 0,
-                        max: 100,
+                        max: 25,
                         divisions: 100,
                         label: '${distance.round()} km',
                         activeColor: CColors.primary,
