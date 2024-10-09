@@ -13,7 +13,7 @@ class AblyService {
 
   Future<void> initialize() async {
     realtime = ably.Realtime(
-      key: "NywJkg.YSZnbg:sjB5yvU8_33NnURpi08Acfm9SJzlAdMFmQEbUHpQoeU",
+      key: "ABLY_KEY",
     );
   }
 

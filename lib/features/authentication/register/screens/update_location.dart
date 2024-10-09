@@ -156,7 +156,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   Future<void> getPlaceDetails(String placeId) async {
     try {
       final response = await Dio().get(
-          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI");
+          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=Google_API_KEY");
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -221,7 +221,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
                 const SizedBox(height: 10),
                 GooglePlaceAutoCompleteTextField(
                   textEditingController: currentLocationController,
-                  googleAPIKey: "AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI",
+                  googleAPIKey: "Google_API_KEY",
                   debounceTime: 200,
                   language: "hebrew",
                   countries: const ["in", "il"],

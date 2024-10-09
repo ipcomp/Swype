@@ -153,6 +153,9 @@ class _UserPreferencesState extends ConsumerState<UserPreferences> {
       if (response.statusCode == 200) {
         final data = response.data;
         if (data['status_code'] == 200) {
+          final user = data['data']['user'];
+          print(user['longitude']);
+          print(user['latitude']);
           ref.read(userProvider.notifier).setUser(data['data']['user']);
           registerNotifier.updateIsPreferencesUpdated(true);
           CHelperFunctions.showToaster(context, data['message']);

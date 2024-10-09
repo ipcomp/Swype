@@ -24,7 +24,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
       TextEditingController();
   final TextEditingController newLocationController = TextEditingController();
   LatLng? newLocation;
-  LatLng? currentLocation;
+  LatLng? currentLocation = LatLng(16.77, 32.55);
   GoogleMapController? mapController;
   List<String> suggestions = [];
   DioClient dioClient = DioClient();
@@ -36,16 +36,20 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   void initState() {
     super.initState();
     final userData = ref.read(userProvider);
+    print(userData?['current_city']);
     final longitude = userData?['longitude'];
     final latitude = userData?['latitude'];
 
-    _setMarker(latitude, longitude);
+    print(longitude);
+    print(latitude);
 
-    setState(() {
-      currentLocation = LatLng(latitude, longitude);
-      currentLocationController.text = userData?['current_city'];
-      newLocationController.text = "";
-    });
+    // _setMarker(latitude, longitude);
+
+    // setState(() {
+    //   currentLocation = LatLng(latitude, longitude);
+    //   currentLocationController.text = userData?['current_city'];
+    //   newLocationController.text = "";
+    // });
   }
 
   Future<void> updateUserLocation() async {
@@ -93,7 +97,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   Future<void> getPlaceDetails(String placeId) async {
     try {
       final response = await Dio().get(
-          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI");
+          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=Google_API_KEY");
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -212,7 +216,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
                 const SizedBox(height: 24),
                 GooglePlaceAutoCompleteTextField(
                   textEditingController: newLocationController,
-                  googleAPIKey: "AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI",
+                  googleAPIKey: "Google_API_KEY",
                   debounceTime: 200,
                   language: "hebrew",
                   countries: const ["in", "il"],
