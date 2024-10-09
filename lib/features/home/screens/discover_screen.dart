@@ -3,11 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:page_animation_transition/animations/fade_animation_transition.dart';
+import 'package:page_animation_transition/page_animation_transition.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/features/authentication/providers/all_users_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/home/controllers/advanced_search_controller.dart';
 import 'package:swype/features/home/data/user_model.dart';
+import 'package:swype/features/home/screens/update_location_screen.dart';
 import 'package:swype/features/home/widgets/filter_bottom_sheet.dart';
 import 'package:swype/features/home/widgets/profile_bottom_sheet.dart';
 import 'package:swype/features/home/widgets/user_card.dart';
@@ -34,11 +37,16 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
   Map<String, dynamic> appliedFilters = {};
   bool isLoading = false;
   int currentImageIndex = 0;
+  dynamic user;
 
   @override
   void initState() {
     super.initState();
     ref.read(profileOptionsProvider.notifier).fetchProfileOptions();
+    final userData = ref.read(userProvider);
+    setState(() {
+      user = userData;
+    });
   }
 
   void applyFilters(Map<String, dynamic> filters) async {
@@ -105,13 +113,13 @@ class _DiscoverScreenPageState extends ConsumerState<DiscoverScreen> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // Navigator.push(
-                      //   context,
-                      //   PageAnimationTransition(
-                      //     page: UpdateLocationScreen(),
-                      //     pageAnimationType: FadeAnimationTransition(),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        PageAnimationTransition(
+                          page: UpdateLocationScreen(),
+                          pageAnimationType: FadeAnimationTransition(),
+                        ),
+                      );
                     },
                     child: Text(
                       currentUser?['current_city'] ?? "Update Location",

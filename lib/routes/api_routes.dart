@@ -23,9 +23,13 @@ class ApiRoutes {
   static const String updatePassword = '$baseUrl/update-password';
   static const String updatePreferences = '$baseUrl/update-preferences';
 
+  // Update Location
+  static const String updateLoaction = '$baseUrl/update-location';
+
   // Matches
   static const String potentialMatches = '$baseUrl/get-potential-matches-user';
   static const String myMatches = '$baseUrl/get-matches-user';
+  static const String swipe = '$baseUrl/swipe';
 
   // Chat
   static const String getConversations = '$baseUrl/get-conversations';

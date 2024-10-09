@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:swype/commons/widgets/custom_drop_down.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
-import 'package:swype/features/authentication/register/screens/user_preferences.dart';
+import 'package:swype/features/authentication/register/screens/update_location.dart';
 import 'package:swype/features/settings/controllers/profile_edit_controller.dart';
 import 'package:swype/features/settings/providers/user_options_provider.dart';
 import 'package:swype/utils/constants/colors.dart';
@@ -96,9 +96,15 @@ class _AddAdditionalProfileDataState
         heightController.clear();
         politicalController.clear();
         professionController.clear();
+        // Navigator.of(context).pushAndRemoveUntil(
+        //   MaterialPageRoute(
+        //     builder: (context) => const UserPreferences(),
+        //   ),
+        //   (Route<dynamic> route) => false,
+        // );
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
-            builder: (context) => const UserPreferences(),
+            builder: (context) => UpdateLocationScreen(),
           ),
           (Route<dynamic> route) => false,
         );
@@ -152,7 +158,7 @@ class _AddAdditionalProfileDataState
                                   Navigator.of(context).pushAndRemoveUntil(
                                     MaterialPageRoute(
                                       builder: (context) =>
-                                          const UserPreferences(),
+                                          UpdateLocationScreen(),
                                     ),
                                     (Route<dynamic> route) => false,
                                   );

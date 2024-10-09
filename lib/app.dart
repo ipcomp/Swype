@@ -24,7 +24,6 @@ class _AppState extends ConsumerState<App> {
 
     ablyService = AblyService(ref);
     ablyService.initialize();
-    ablyService.subscribeToOnlineUsers();
   }
 
   void fetchInitialData() {

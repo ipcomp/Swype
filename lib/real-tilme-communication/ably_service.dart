@@ -17,19 +17,8 @@ class AblyService {
     );
   }
 
-  Future<void> subscribeToOnlineUsers() async {
-    ably.RealtimeChannel channel = realtime!.channels.get('chat');
-    channel.subscribe(name: "message").listen((ably.Message message) {
-      if (message.data is Map) {
-        final data = message.data as Map;
-        print(data);
-      } else {
-        print('Unexpected data format: ${message.data}');
-      }
-    });
-  }
-
   Future<void> publishNewMatch(String id) async {
+    print(id);
     ably.RealtimeChannel matchChannel = realtime!.channels.get('match:$id');
 
     matchChannel.subscribe(name: "newMatch").listen((ably.Message message) {

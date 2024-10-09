@@ -1,142 +1,304 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:google_places_flutter/google_places_flutter.dart';
+import 'package:google_places_flutter/model/place_details.dart';
+import 'package:google_places_flutter/model/place_type.dart';
+import 'package:google_places_flutter/model/prediction.dart';
+import 'package:swype/features/authentication/providers/user_provider.dart';
+import 'package:swype/routes/api_routes.dart';
+import 'package:swype/utils/constants/colors.dart';
+import 'package:swype/utils/dio/dio_client.dart';
+import 'package:swype/utils/helpers/helper_functions.dart';
+import 'package:swype/utils/helpers/loader_screen.dart';
 
-class UpdateLocationScreen extends StatefulWidget {
+class UpdateLocationScreen extends ConsumerStatefulWidget {
   @override
-  _ChangeLocationScreenState createState() => _ChangeLocationScreenState();
+  _UpdateLocationScreenState createState() => _UpdateLocationScreenState();
 }
 
-class _ChangeLocationScreenState extends State<UpdateLocationScreen> {
+class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   final TextEditingController currentLocationController =
       TextEditingController();
   final TextEditingController newLocationController = TextEditingController();
   LatLng? newLocation;
+  LatLng? currentLocation;
   GoogleMapController? mapController;
+  List<String> suggestions = [];
+  DioClient dioClient = DioClient();
+  bool isLoading = false;
+  String? cityName;
+  Set<Marker> markers = {};
 
   @override
   void initState() {
     super.initState();
-    // Set a default current location (this could be user's current location fetched via GPS)
-    currentLocationController.text = "75 Sokolov Nachum, Jerusalem, Israel";
-    newLocationController.text = "9 Maagal Hashalom, Rishon Lezion, Israel";
+    final userData = ref.read(userProvider);
+    final longitude = userData?['longitude'];
+    final latitude = userData?['latitude'];
+
+    _setMarker(latitude, longitude);
+
+    setState(() {
+      currentLocation = LatLng(latitude, longitude);
+      currentLocationController.text = userData?['current_city'];
+      newLocationController.text = "";
+    });
   }
 
-  // Function to update the location by geocoding the address
-  Future<void> updateAddress(String address) async {
+  Future<void> updateUserLocation() async {
+    FocusScope.of(context).unfocus();
+    if (newLocation == null) {
+      print("No new location selected.");
+      CHelperFunctions.showToaster(context, "No new location selected.");
+      return;
+    }
+    setState(() {
+      isLoading = true;
+    });
     try {
-      List<Location> locations = await locationFromAddress(address);
-      if (locations.isNotEmpty) {
-        final loc = locations.first;
+      FormData formData = FormData.fromMap({
+        'latitude': newLocation!.latitude,
+        'longitude': newLocation!.longitude,
+        'current_city': cityName,
+      });
+
+      final response = await dioClient.postWithFormData(
+        ApiRoutes.updateLoaction,
+        formData,
+      );
+      final data = response.data;
+      if (data['status_code'] == 200) {
+        CHelperFunctions.showToaster(context, data['message']);
+        final user = data['data']['user'];
+        ref.read(userProvider.notifier).setUser(user);
+        Navigator.pop(context);
+      } else {
+        print(data);
+        CHelperFunctions.showToaster(context, data['message']);
+      }
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> getPlaceDetails(String placeId) async {
+    try {
+      final response = await Dio().get(
+          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI");
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final placeDetails = PlaceDetails.fromJson(data);
         setState(() {
-          newLocation = LatLng(loc.latitude, loc.longitude);
-          mapController?.moveCamera(
-            CameraUpdate.newLatLng(newLocation!),
-          );
+          cityName = placeDetails.result?.name;
         });
+      } else {
+        print("Error: ${response.statusCode}");
       }
     } catch (e) {
-      print("Error in geocoding: $e");
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Failed to fetch location for the address."),
-      ));
+      print("Error fetching place details: $e");
     }
+  }
+
+  void _setMarker(double latitude, double longitude) {
+    setState(() {
+      markers.clear();
+      mapController
+          ?.animateCamera(CameraUpdate.newLatLng(LatLng(latitude, longitude)));
+      markers.add(
+        Marker(
+          markerId: const MarkerId("newLocation"),
+          position: LatLng(latitude, longitude),
+        ),
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final translations = CHelperFunctions().getTranslations(ref);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Change Location'),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.red),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(75),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          child: AppBar(
+            backgroundColor: Colors.white,
+            toolbarHeight: 75,
+            title: Text(
+              translations['Change Location'] ?? 'Change Location',
+              style: TextStyle(
+                color: CColors.primary,
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                height: 1.5,
+              ),
+            ),
+            automaticallyImplyLeading: false,
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ButtonStyle(
+                  splashFactory: NoSplash.splashFactory,
+                  elevation: WidgetStateProperty.all(0),
+                  overlayColor: WidgetStateProperty.all(Colors.transparent),
+                  shadowColor: WidgetStateProperty.all(Colors.transparent),
+                ),
+                child: Container(
+                  height: 52,
+                  width: 52,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                    border: Border.all(
+                      color: const Color(0xFFE8E6EA),
+                    ),
+                  ),
+                  child: SvgPicture.asset(
+                    'assets/svg/back_right.svg',
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(20.0),
+        child: Stack(
           children: [
-            const SizedBox(height: 16),
-            // Current Location
-            TextFormField(
-              controller: currentLocationController,
-              readOnly: true, // Current location is static
-              decoration: InputDecoration(
-                labelText: 'Current Location',
-                suffixIcon: IconButton(
-                  onPressed: () => currentLocationController.clear(),
-                  icon: const Icon(Icons.clear),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Change to',
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            // New Location TextField
-            TextFormField(
-              controller: newLocationController,
-              decoration: InputDecoration(
-                labelText: 'New Location',
-                suffixIcon: IconButton(
-                  onPressed: () {
-                    updateAddress(newLocationController.text);
-                  },
-                  icon: const Icon(Icons.search),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Google Map Display
-            Expanded(
-              child: GoogleMap(
-                onMapCreated: (controller) {
-                  mapController = controller;
-                },
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(31.7683, 35.2137), // Default to Jerusalem
-                  zoom: 14.0,
-                ),
-                markers: newLocation != null
-                    ? {
-                        Marker(
-                          markerId: const MarkerId('newLocation'),
-                          position: newLocation!,
-                        )
-                      }
-                    : {},
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Update Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Handle address update logic here
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(
-                        "Address updated to: ${newLocationController.text}"),
-                  ));
-                },
-                child: const Text('Update the Address'),
-                style: ElevatedButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: currentLocationController,
+                  readOnly: true,
+                  decoration: InputDecoration(
+                    labelText: 'Current Location',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        currentLocationController.clear();
+                      },
+                      icon: const Icon(Icons.clear),
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-              ),
+                const SizedBox(height: 20),
+                Center(
+                  child: Text(
+                    'Change to',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: CColors.primary,
+                      fontWeight: FontWeight.w400,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                GooglePlaceAutoCompleteTextField(
+                  textEditingController: newLocationController,
+                  googleAPIKey: "AIzaSyC6JQ3AaJopbIxj3e8ELKXHHEWCs4gEYqI",
+                  debounceTime: 200,
+                  language: "hebrew",
+                  countries: const ["in", "il"],
+                  isLatLngRequired: true,
+                  inputDecoration: InputDecoration(
+                      hintText: "Search your City",
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            newLocationController.text = '';
+                          });
+                        },
+                        icon: const Icon(Icons.clear),
+                      )),
+                  getPlaceDetailWithLatLng: (Prediction prediction) {
+                    double latitude = double.tryParse(prediction.lat!) ?? 0.0;
+                    double longitude = double.tryParse(prediction.lng!) ?? 0.0;
+                    _setMarker(latitude, longitude);
+                    getPlaceDetails(prediction.placeId!);
+                    setState(() {
+                      newLocation = LatLng(latitude, longitude);
+                    });
+                  },
+                  itemClick: (Prediction prediction) {
+                    FocusScope.of(context).unfocus();
+                    newLocationController.text = prediction.description!;
+                    newLocationController.selection =
+                        TextSelection.fromPosition(
+                      TextPosition(offset: prediction.description!.length),
+                    );
+                  },
+                  itemBuilder: (context, index, Prediction prediction) {
+                    return Container(
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(
+                            color: CColors.borderColor,
+                          )),
+                      padding: const EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.location_on),
+                          const SizedBox(
+                            width: 7,
+                          ),
+                          Expanded(
+                            child: Text(prediction.description ?? ""),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  isCrossBtnShown: false,
+                  containerHorizontalPadding: 0,
+                  placeType: PlaceType.geocode,
+                  boxDecoration: BoxDecoration(
+                    border: Border.all(
+                      width: 0,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: GoogleMap(
+                    onMapCreated: (controller) {
+                      mapController = controller;
+                    },
+                    initialCameraPosition: CameraPosition(
+                      target: currentLocation!,
+                      zoom: 14.0,
+                    ),
+                    markers: markers,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: updateUserLocation,
+                    child: const Text("Update Address"),
+                  ),
+                ),
+              ],
             ),
+            if (isLoading) const LoaderScreen(gifPath: "assets/gif/loader.gif")
           ],
         ),
       ),

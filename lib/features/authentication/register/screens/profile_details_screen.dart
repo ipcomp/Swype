@@ -421,7 +421,7 @@ class _ProfileDetailsScreenState extends ConsumerState<ProfileDetailsScreen>
   }
 
   void _onDateChanged() {
-    setState(() {}); // Trigger a rebuild to update the icon
+    setState(() {});
   }
 }
 
