@@ -18,6 +18,8 @@ import 'package:swype/features/chat/controllers/chat_controller.dart';
 import 'package:swype/features/chat/provider/chat_conversations_provider.dart';
 import 'package:swype/features/home/controllers/discover_controller.dart';
 import 'package:swype/features/home/screens/discover_screen.dart';
+import 'package:swype/features/matches/controllers/match_screen_controller.dart';
+import 'package:swype/features/matches/provider/matches_provider.dart';
 import 'package:swype/features/settings/screens/language/language_selection_screen.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/dio/dio_client.dart';
@@ -29,6 +31,8 @@ class SplashController {
   DioClient dioClient = DioClient();
   DiscoverController discoverController = DiscoverController();
   ChatController chatController = ChatController();
+  MatchScreenController matchScreenController = MatchScreenController();
+
   final LocalAuthentication auth = LocalAuthentication();
 
   SplashController(this.ref);
@@ -102,6 +106,9 @@ class SplashController {
       if (token != null) {
         ref.read(allUsersProvider.notifier).fetchUserList(token);
         final conversations = await chatController.fecthConversations();
+        final getMatchesUser =
+            await matchScreenController.fetchMatchUsers(context);
+        ref.read(matchesProvider.notifier).loadMatchModal(getMatchesUser!);
         ref
             .read(chatConversationProvider.notifier)
             .loadConversations(conversations);

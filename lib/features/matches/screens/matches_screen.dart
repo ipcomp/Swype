@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:swype/commons/widgets/custom_bottom_bar.dart';
 import 'package:swype/features/matches/controllers/match_screen_controller.dart';
-import 'package:swype/features/matches/data/users.dart';
+import 'package:swype/features/matches/models/matches_modal.dart';
+import 'package:swype/features/matches/provider/matches_provider.dart';
 import 'package:swype/features/matches/widgets/grid_view.dart';
 import 'package:swype/features/matches/widgets/list_view.dart';
 import 'package:swype/routes/app_routes.dart';
@@ -20,7 +22,7 @@ class MatchesScreen extends ConsumerStatefulWidget {
 
 class _MatchesScreenState extends ConsumerState<MatchesScreen> {
   MatchScreenController matchScreenController = MatchScreenController();
-  Users userData = Users();
+
   bool isGridView = true;
   bool isLoading = false;
 
@@ -31,6 +33,7 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final matchesUser = ref.watch(matchesProvider);
     final translations = CHelperFunctions().getTranslations(ref);
     return PopScope(
       canPop: false,
@@ -105,13 +108,38 @@ class _MatchesScreenState extends ConsumerState<MatchesScreen> {
                     ),
                   Expanded(
                     child: isGridView
-                        ? buildGridView(userData.users)
-                        : buildListView(userData.users),
+                        ? buildGridView(matchesUser.mergedItems,
+                            (liked, userId, user) {
+                            onTapOfMatchCard(liked, userId, user);
+                          }, isLoading)
+                        : buildListView(matchesUser.mergedItems,
+                            (liked, userId, user) {
+                            onTapOfMatchCard(liked, userId, user);
+                          }, isLoading),
                   ),
                 ],
               ),
         bottomNavigationBar: customBottomBar(context, AppRoutes.matches, ref),
       ),
     );
+  }
+
+  void onTapOfMatchCard(String liked, int userId, MatchModalItem user) async {
+    setState(() {
+      isLoading = true;
+    });
+
+    FormData formData = FormData();
+
+    print('user id = $userId');
+
+    formData.fields.add(MapEntry('to_user_id', userId.toString()));
+    formData.fields.add(MapEntry('liked', liked));
+
+    await matchScreenController.swipeUser(context, ref, formData, user);
+
+    setState(() {
+      isLoading = false;
+    });
   }
 }

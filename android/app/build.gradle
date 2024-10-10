@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.swype"
+    namespace = "com.swype"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -22,7 +22,7 @@ android {
     
 
     defaultConfig {
-        applicationId = "com.example.swype"
+        applicationId = "com.swype"
         minSdk = 23
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

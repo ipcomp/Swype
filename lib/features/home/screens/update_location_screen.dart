@@ -36,20 +36,15 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   void initState() {
     super.initState();
     final userData = ref.read(userProvider);
-    print(userData?['current_city']);
     final longitude = userData?['longitude'];
     final latitude = userData?['latitude'];
+    _setMarker(latitude, longitude);
 
-    print(longitude);
-    print(latitude);
-
-    // _setMarker(latitude, longitude);
-
-    // setState(() {
-    //   currentLocation = LatLng(latitude, longitude);
-    //   currentLocationController.text = userData?['current_city'];
-    //   newLocationController.text = "";
-    // });
+    setState(() {
+      currentLocation = LatLng(latitude, longitude);
+      currentLocationController.text = userData?['current_city'] ?? "";
+      newLocationController.text = "";
+    });
   }
 
   Future<void> updateUserLocation() async {
@@ -97,7 +92,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
   Future<void> getPlaceDetails(String placeId) async {
     try {
       final response = await Dio().get(
-          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=Google_API_KEY");
+          "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&key=google_key_temp");
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -216,7 +211,7 @@ class _UpdateLocationScreenState extends ConsumerState<UpdateLocationScreen> {
                 const SizedBox(height: 24),
                 GooglePlaceAutoCompleteTextField(
                   textEditingController: newLocationController,
-                  googleAPIKey: "Google_API_KEY",
+                  googleAPIKey: "google_key_temp",
                   debounceTime: 200,
                   language: "hebrew",
                   countries: const ["in", "il"],

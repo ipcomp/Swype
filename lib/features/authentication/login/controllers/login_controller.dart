@@ -9,6 +9,7 @@ import 'package:swype/features/authentication/providers/register_provider.dart';
 import 'package:swype/features/authentication/providers/user_provider.dart';
 import 'package:swype/features/authentication/register/screens/otp_verification_screen.dart';
 import 'package:swype/features/authentication/register/screens/profile_details_screen.dart';
+import 'package:swype/features/authentication/register/screens/update_location.dart';
 import 'package:swype/routes/api_routes.dart';
 import 'package:swype/utils/helpers/helper_functions.dart';
 
@@ -34,6 +35,7 @@ class LoginController {
           final id = user['id'];
           final name = user['username'];
           final phone = user['phone'];
+          final longitude = user['longitude'];
           ref
               .read(registerProvider.notifier)
               .saveUserInfo(token, '$id', name, email, '$phone');
@@ -53,6 +55,15 @@ class LoginController {
               context,
               MaterialPageRoute(
                 builder: (context) => const ProfileDetailsScreen(),
+              ),
+              (Route<dynamic> route) => false,
+            );
+            return false;
+          } else if (longitude == null) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const UpdateLocationScreen(),
               ),
               (Route<dynamic> route) => false,
             );
@@ -106,13 +117,54 @@ class LoginController {
             );
             return false;
           } else if (data['status_code'] == 200) {
-            final authToken = data['data']['access_token'];
-            final userId = data['data']['user']['id'];
-            ref.read(authProvider.notifier).login(authToken, '$userId');
-            ref.read(userProvider.notifier).setUser(data['data']['user']);
-            ref.read(allUsersProvider.notifier).fetchUserList(authToken);
-            CHelperFunctions.showToaster(context, data['message']);
-            return true;
+            final user = data['data']['user'];
+            final token = data['data']['access_token'];
+            final id = user['id'];
+            final name = user['username'];
+            final phone = user['phone'];
+            final longitude = user['longitude'];
+            print(longitude);
+            ref
+                .read(registerProvider.notifier)
+                .saveUserInfo(token, '$id', name, email, '$phone');
+            if (user['phone_verified'] == 0) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OtpVerificationScreen(
+                    phoneNumber: user['phone'],
+                  ),
+                ),
+                (Route<dynamic> route) => false,
+              );
+              return false;
+            } else if (user['first_name'] == null) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileDetailsScreen(),
+                ),
+                (Route<dynamic> route) => false,
+              );
+              return false;
+            } else if (longitude == null) {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const UpdateLocationScreen(),
+                ),
+                (Route<dynamic> route) => false,
+              );
+              return false;
+            } else {
+              final authToken = data['data']['access_token'];
+              final userId = data['data']['user']['id'];
+              ref.read(authProvider.notifier).login(authToken, '$userId');
+              ref.read(userProvider.notifier).setUser(data['data']['user']);
+              ref.read(allUsersProvider.notifier).fetchUserList(authToken);
+              CHelperFunctions.showToaster(context, data['message']);
+              return true;
+            }
           } else {
             print(data);
             CHelperFunctions.showToaster(context, data['message']);
